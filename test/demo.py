@@ -1,4 +1,4 @@
-from codepy.cgen import *
+from cgen import *
 from codepy.bpl import BoostPythonModule
 mod = BoostPythonModule()
 
@@ -9,7 +9,7 @@ mod.add_function(
             ))
 
 from codepy.toolchain import guess_toolchain
-cmod = mod.compile(guess_toolchain(), wait_on_error=True)
+cmod = mod.compile(guess_toolchain())
 
 print cmod.greet()
 

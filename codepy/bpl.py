@@ -1,5 +1,7 @@
 """Convenience interface for using CodePy with Boost.Python."""
 
+from __future__ import absolute_import
+
 
 
 
@@ -26,7 +28,7 @@ class BoostPythonModule(object):
         self.preamble.extend(pa)
 
     def add_to_module(self, body):
-        """Add the :class:`codepy.cgen.Generable` instances in the iterable
+        """Add the :class:`cgen.Generable` instances in the iterable
         *body* to the body of the module *self*.
         """
 
@@ -36,7 +38,7 @@ class BoostPythonModule(object):
         if self.has_codepy_include:
             return
 
-        from codepy.cgen import Include
+        from cgen import Include
 
         self.add_to_preamble([
             Include("codepy/bpl.hpp")
@@ -47,7 +49,7 @@ class BoostPythonModule(object):
         if self.has_raw_function_include:
             return
 
-        from codepy.cgen import Include
+        from cgen import Include
 
         self.add_to_preamble([
             Include("boost/python/raw_function.hpp")
@@ -60,7 +62,7 @@ class BoostPythonModule(object):
         if py_name is None:
             py_name = name
 
-        from codepy.cgen import (Block, Typedef, Line, Statement, Value)
+        from cgen import (Block, Typedef, Line, Statement, Value)
 
         self.init_body.append(
             Block([
@@ -73,11 +75,11 @@ class BoostPythonModule(object):
 
     def add_function(self, func):
         """Add a function to be exposed. *func* is expected to be a
-        :class:`codepy.cgen.FunctionBody`.
+        :class:`cgen.FunctionBody`.
         """
 
         self.mod_body.append(func)
-        from codepy.cgen import Statement
+        from cgen import Statement
         self.init_body.append(
                 Statement(
                     "boost::python::def(\"%s\", &%s)" % (
@@ -85,10 +87,10 @@ class BoostPythonModule(object):
 
     def add_raw_function(self, func):
         """Add a function to be exposed using boost::python::raw_function.
-        *func* is expected to be a :class:`codepy.cgen.FunctionBody`.
+        *func* is expected to be a :class:`cgen.FunctionBody`.
         """
         self.mod_body.append(func)
-        from codepy.cgen import Statement
+        from cgen import Statement
         self.add_raw_function_include()
         raw_function = "boost::python::raw_function(&%s)" % func.fdecl.name
         self.init_body.append(
@@ -98,7 +100,7 @@ class BoostPythonModule(object):
         
     def add_struct(self, struct, py_name=None, py_member_name_transform=lambda x: x,
             by_value_members=set()):
-        from codepy.cgen import Block, Line, Statement, Typedef, Value
+        from cgen import Block, Line, Statement, Typedef, Value
 
         if py_name is None:
             py_name = struct.tpname
@@ -130,7 +132,7 @@ class BoostPythonModule(object):
         module line-by-line.
         """
 
-        from codepy.cgen import Block, Module, Include, Line, Define, \
+        from cgen import Block, Module, Include, Line, Define, \
                 PrivateNamespace
 
         body = []
