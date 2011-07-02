@@ -1,7 +1,7 @@
-from codepy.cgen import *
+from cgen import *
 from codepy.bpl import BoostPythonModule
 from codepy.cuda import CudaModule
-from codepy.cgen.cuda import CudaGlobal
+from cgen.cuda import CudaGlobal
 
 # This file tests the ability to use compile and link CUDA code into the
 # Python interpreter.  Running this test requires PyCUDA

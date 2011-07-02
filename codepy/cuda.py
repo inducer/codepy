@@ -1,4 +1,4 @@
-import codepy.cgen
+import cgen
 """Convenience interface for using CodePy with CUDA"""
 
 
@@ -20,20 +20,20 @@ class CudaModule(object):
         self.preamble = []
         self.body = []
         self.boost_module = boost_module
-        self.boost_module.add_to_preamble([codepy.cgen.Include('cuda.h')])
+        self.boost_module.add_to_preamble([cgen.Include('cuda.h')])
 
     def add_to_preamble(self, pa):
         self.preamble.extend(pa)
 
     def add_to_module(self, body):
-        """Add the :class:`codepy.cgen.Generable` instances in the iterable
+        """Add the :class:`cgen.Generable` instances in the iterable
         *body* to the body of the module *self*.
         """
         self.body.extend(body)
 
     def add_function(self, func):
         """Add a function to be exposed to code in the BoostPythonModule.
-        *func* is expected to be a :class:`codepy.cgen.FunctionBody`.
+        *func* is expected to be a :class:`cgen.FunctionBody`.
         Additionally, *func* must be a host callable function,
         not a CUDA __global__ entrypoint.
         """
@@ -45,9 +45,9 @@ class CudaModule(object):
         module line-by-line.
         """
         body = []
-        body += (self.preamble + [codepy.cgen.Line()]
+        body += (self.preamble + [cgen.Line()]
                 + self.body)
-        return codepy.cgen.Module(body)
+        return cgen.Module(body)
 
     def compile(self, host_toolchain, nvcc_toolchain, host_kwargs={},
                 nvcc_kwargs={}, **kwargs):

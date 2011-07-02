@@ -45,6 +45,7 @@ setup(name="codepy",
       packages=["codepy", "codepy.cgen"],
       install_requires=[
           "pytools>=8",
+          "cgen",
           ],
       data_files=[("include/codepy", glob.glob("include/codepy/*.hpp"))],
      )

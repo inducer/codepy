@@ -1,5 +1,5 @@
 def make_greet_mod(greeting):
-    from codepy.cgen import FunctionBody, FunctionDeclaration, Block, \
+    from cgen import FunctionBody, FunctionDeclaration, Block, \
             Const, Pointer, Value, Statement
     from codepy.bpl import BoostPythonModule
 

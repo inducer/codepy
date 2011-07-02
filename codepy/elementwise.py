@@ -9,7 +9,7 @@ __copyright__ = "Copyright (C) 2009 Andreas Kloeckner"
 
 from pytools import memoize
 import numpy
-from codepy.cgen import POD, Value, dtype_to_ctype
+from cgen import POD, Value, dtype_to_ctype
 
 
 
@@ -52,7 +52,7 @@ class ScalarArg(Argument):
 def get_elwise_module_descriptor(arguments, operation, name="kernel"):
     from codepy.bpl import BoostPythonModule
 
-    from codepy.cgen import FunctionBody, FunctionDeclaration, \
+    from cgen import FunctionBody, FunctionDeclaration, \
             Value, POD, Struct, For, Initializer, Include, Statement, \
             Line, Block
 

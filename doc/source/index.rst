@@ -26,7 +26,7 @@ A taste of CodePy
 This sample CodePy program builds a Boost.Python C++ module that returns
 the string "hello world"::
 
-    from codepy.cgen import *
+    from cgen import *
     from codepy.bpl import BoostPythonModule
     mod = BoostPythonModule()
 
@@ -71,9 +71,11 @@ Contents
 .. toctree::
     :maxdepth: 2
 
-    cgen
     jit
     faq
+
+If you are looking for the :mod:`codepy.cgen` module, it has been moved to a
+separate package called :mod:`cgen`.
 
 Indices and tables
 ==================
