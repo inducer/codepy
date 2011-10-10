@@ -1,4 +1,4 @@
-from cgen import *
+from codepy.cgen import *
 from codepy.bpl import BoostPythonModule
 from codepy.cuda import CudaModule
 from cgen.cuda import CudaGlobal
@@ -11,6 +11,10 @@ from cgen.cuda import CudaGlobal
 # The host module should include a function which is callable from Python
 host_mod = BoostPythonModule()
 
+# Are we on a 32 or 64 bit platform?
+import sys, math
+bitness = math.log(sys.maxsize) + 1
+ptr_sz_uint_conv = 'K' if bitness > 32 else 'I'
 
 # This host function extracts a pointer and shape information from a PyCUDA
 # GPUArray, and then sends them to a CUDA function.  The CUDA function
@@ -30,7 +34,7 @@ statements = [
     # Build resulting GPUArray
     'PyObject* args = Py_BuildValue("()")',
     'PyObject* newShape = Py_BuildValue("(i)", intLength)',
-    'PyObject* kwargs = Py_BuildValue("{sOsOsi}", "shape", newShape, "dtype", type, "gpudata", diffResult)',
+    'PyObject* kwargs = Py_BuildValue("{sOsOs%s}", "shape", newShape, "dtype", type, "gpudata", diffResult)' % ptr_sz_uint_conv,
     'PyObject* GPUArrayClass = PyObject_GetAttrString(gpuArray, "__class__")',
     'PyObject* remoteResult = PyObject_Call(GPUArrayClass, args, kwargs)',
     'return remoteResult']
@@ -106,7 +110,7 @@ constantValue = 2
 
 pointer = pycuda.driver.mem_alloc(length * 4)
 pycuda.driver.memset_d32(pointer, constantValue, length)
-a = pycuda.gpuarray.GPUArray((25,), np.int32, gpudata=pointer)
+a = pycuda.gpuarray.GPUArray((length,), np.int32, gpudata=pointer)
 b = module.adjacentDifference(a).get()
 
 golden = [constantValue] + [0] * (length - 1)
