@@ -23,6 +23,9 @@ setup(name="codepy",
       well in conjunction with `PyCuda <http://mathema.tician.de/software/pycuda>`_.
       Dynamic compilation and linking are so far only supported in Linux
       with the GNU toolchain.
+
+      See also the `documentation <http://documen.tician.de/codepy>`_ and the
+      `git tree <http://github.com/inducer/codepy>`_.
       """,
       classifiers=[
         'Development Status :: 4 - Beta',
