@@ -75,7 +75,8 @@ Contents
     faq
 
 If you are looking for the :mod:`codepy.cgen` module, it has been moved to a
-separate package called :mod:`cgen`.
+separate package called :mod:`cgen`, see also that package's `package index
+page <http://pypi.python.org/pypi/cgen>`_.
 
 Indices and tables
 ==================
