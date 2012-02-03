@@ -14,8 +14,9 @@ class Toolchain(Record):
     """Abstract base class for tools used to link dynamic Python modules."""
 
     def __init__(self, *args, **kwargs):
+        if 'features' not in kwargs:
+            kwargs['features'] = set()
         Record.__init__(self, *args, **kwargs)
-        self.features = set()
 
     def get_version(self):
         """Return a string describing the exact version of the tools (compilers etc.)
