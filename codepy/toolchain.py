@@ -143,6 +143,7 @@ class GCCLikeToolchain(Toolchain):
                 + ["-D%s" % define for define in self.defines]
                 + ["-U%s" % undefine for undefine in self.defines]
                 + ["-I%s" % idir for idir in self.include_dirs]
+                + self.cflags
                 + source_files
                 )
 
