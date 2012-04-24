@@ -374,6 +374,14 @@ def _guess_toolchain_kwargs_from_python_config():
         else:
             cflags.append(cflag)
 
+    # on Mac OS X, "libraries" can also be "frameworks"
+    libraries = []
+    for lib in make_vars["LIBS"].split():
+        if lib.startswith("-l"):
+            libraries.append(strip_prefix("-l", lib))
+        else:
+            cflags.append(lib)
+
     return dict(
             cc=cc_cmdline[0],
             ld=make_vars["LDSHARED"].split()[0],
@@ -382,8 +390,7 @@ def _guess_toolchain_kwargs_from_python_config():
                 make_vars["LDSHARED"].split()[1:]
                 + make_vars["LINKFORSHARED"].split()
                 ),
-            libraries=[strip_prefix("-l", lib)
-                for lib in make_vars["LIBS"].split()],
+            libraries=libraries,
             include_dirs=[
                 make_vars["INCLUDEPY"]
                 ],
