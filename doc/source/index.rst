@@ -36,11 +36,10 @@ the string "hello world"::
                 Block([Statement('return "hello world"')])
                 ))
 
-    from codepy.jit import guess_toolchain
-    cmod = mod.compile(guess_toolchain(), wait_on_error=True)
+    from codepy.toolchain import guess_toolchain
+    cmod = mod.compile(guess_toolchain())
 
     print cmod.greet()
-
 
 Boost.Python and CodePy
 ^^^^^^^^^^^^^^^^^^^^^^^
