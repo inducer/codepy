@@ -102,11 +102,13 @@ def get_boost_libname(basename, aksetup):
 
 def add_boost_python(toolchain):
     aksetup = get_aksetup_config()
+    import sys
     toolchain.add_library(
             "boost-python",
             aksetup.get("BOOST_INC_DIR", []),
             aksetup.get("BOOST_LIB_DIR", []),
             get_boost_libname("python", aksetup)
+            + ["python%d.%d" %  sys.version_info[:2]]
             )
 
 
