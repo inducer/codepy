@@ -127,7 +127,7 @@ class GCCLikeToolchain(Toolchain):
         from pytools.prefork import call_capture_output
         result, stdout, stderr = call_capture_output([self.cc, "--version"])
         if result != 0:
-            raise RuntimeError("version query failed: "+stderrr)
+            raise RuntimeError("version query failed: "+stderr)
         return stdout
 
     def enable_debugging(self):
@@ -280,7 +280,7 @@ class NVCCToolchain(GCCLikeToolchain):
         numbers = words[4].split('.') + words[5].split('.')
 
         result = []
-        for n in number:
+        for n in numbers:
             try:
                 result.append(int(n))
             except ValueError:
