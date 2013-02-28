@@ -78,27 +78,31 @@ class CudaModule(object):
 
         # Don't compile shared objects, just normal objects
         # (on some platforms, they're different)
-        host_mod_name, host_object, host_compiled = compile_from_string(
+        host_checksum, host_mod_name, host_object, host_compiled = compile_from_string(
             host_toolchain, self.boost_module.name, host_code,
             object=True, **local_host_kwargs)
-        device_mod_name, device_object, device_compiled = compile_from_string(
+        device_checksum, device_mod_name, device_object, device_compiled = compile_from_string(
             nvcc_toolchain, 'gpu', device_code, 'gpu.cu',
             object=True, **local_nvcc_kwargs)
+        # The name of the shared lib depends on the hex checksums of both
+        # host and device code to prevent accidentially returned a cached
+        # module with wrong linkage
+        mod_name = "codepy.temp.%s.%s.module" % (host_checksum, device_checksum)
 
         if host_compiled or device_compiled:
             return link_extension(host_toolchain,
                                   [host_object, device_object],
-                                  host_mod_name, **kwargs)
+                                  mod_name, **kwargs)
         else:
             import os.path
 
             destination_base, first_object = os.path.split(host_object)
-            module_path = os.path.join(destination_base, host_mod_name
+            module_path = os.path.join(destination_base, mod_name
                                        + host_toolchain.so_ext)
             try:
                 from imp import load_dynamic
-                return load_dynamic(host_mod_name, module_path)
+                return load_dynamic(mod_name, module_path)
             except:
                 return link_extension(host_toolchain,
                                       [host_object, device_object],
-                                      host_mod_name, **kwargs)
+                                      mod_name, **kwargs)
