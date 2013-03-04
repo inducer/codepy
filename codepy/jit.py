@@ -172,7 +172,7 @@ def extension_from_string(toolchain, name, source_string,
     If *debug_recompile*, messages are printed indicating whether a
     recompilation is taking place.
     """
-    mod_name, ext_file, recompiled = \
+    checksum, mod_name, ext_file, recompiled = \
         compile_from_string(toolchain,
                             name, source_string,
                             source_name,
@@ -373,7 +373,7 @@ def compile_from_string(toolchain, name, source_string,
                 else:
                     if check_deps(info.dependencies) and check_source(
                             mod_cache_dir_m.sub(info.source_name)):
-                        return mod_name, ext_file, False
+                        return hex_checksum, mod_name, ext_file, False
             else:
                 if debug_recompile:
                     print "recompiling for non-existent cache dir (%s)." % (
@@ -403,7 +403,7 @@ def compile_from_string(toolchain, name, source_string,
                 source_name=source_name), info_file)
             info_file.close()
 
-        return mod_name, ext_file, True
+        return hex_checksum, mod_name, ext_file, True
     except:
         cleanup_m.error_clean_up()
         raise
