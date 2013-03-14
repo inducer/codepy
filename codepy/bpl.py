@@ -54,7 +54,7 @@ class BoostPythonModule(object):
         self.add_to_preamble([
             Include("boost/python/raw_function.hpp")
             ])
-        self.has_raw_function_include = True                        
+        self.has_raw_function_include = True
 
     def expose_vector_type(self, name, py_name=None):
         self.add_codepy_include()
@@ -97,7 +97,7 @@ class BoostPythonModule(object):
             Statement(
                 "boost::python::def(\"%s\", %s)" % (
                     func.fdecl.name, raw_function)))
-        
+
     def add_struct(self, struct, py_name=None, py_member_name_transform=lambda x: x,
             by_value_members=set()):
         from cgen import Block, Line, Statement, Typedef, Value

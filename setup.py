@@ -5,28 +5,17 @@ import distribute_setup
 distribute_setup.use_setuptools()
 
 from setuptools import setup
-import glob
+
+try:
+    from distutils.command.build_py import build_py_2to3 as build_py
+except ImportError:
+    # 2.x
+    from distutils.command.build_py import build_py
 
 setup(name="codepy",
-      version="2012.1.2",
+      version="2013.1",
       description="Generate and execute native code at run time.",
-      long_description="""
-      CodePy is a C/C++ metaprogramming toolkit for Python. It handles two aspects of
-      native-code metaprogramming:
-
-      * Generating C/C++ source code.
-      * Compiling this source code and dynamically loading it into the
-        Python interpreter.
-
-      Both capabilities are meant to be used together, but also work
-      on their own. In particular, the code generation facilities work
-      well in conjunction with `PyCuda <http://mathema.tician.de/software/pycuda>`_.
-      Dynamic compilation and linking are so far only supported in Linux
-      with the GNU toolchain.
-
-      See also the `documentation <http://documen.tician.de/codepy>`_ and the
-      `git tree <http://github.com/inducer/codepy>`_.
-      """,
+      long_description=open("README.rst", "rt").read(),
       classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -50,5 +39,14 @@ setup(name="codepy",
           "pytools>=8",
           "cgen",
           ],
-      data_files=[("include/codepy", glob.glob("include/codepy/*.hpp"))],
-     )
+
+      include_package_data=True,
+      package_data={
+          "codepy": [
+              "include/codepy/*.hpp",
+              ]
+          },
+
+      # 2to3 invocation
+      cmdclass={'build_py': build_py},
+      zip_safe=False)

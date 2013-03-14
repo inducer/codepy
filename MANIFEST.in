@@ -1,8 +1,11 @@
 include test/*.py
+
 include doc/source/*.rst
 include doc/Makefile
 include doc/source/conf.py
 
+include README.rst
+
 include distribute_setup.py
 include Makefile.in
-include include/codepy/*.hpp
+include codepy/include/codepy/*.hpp
