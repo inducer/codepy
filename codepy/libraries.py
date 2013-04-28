@@ -85,17 +85,11 @@ def get_aksetup_config():
 
 
 # libraries -------------------------------------------------------------------
-def get_boost_compiler(aksetup):
-    return aksetup.get("BOOST_COMPILER", "gcc43")
-
-
-
-
 def get_boost_libname(basename, aksetup):
     try:
         return aksetup["BOOST_%s_LIBNAME" % basename.upper()]
     except KeyError:
-        return ["boost_%s-%s-mt" % (basename, get_boost_compiler(aksetup))]
+        return ["boost_%s" % (basename)]
 
 
 
