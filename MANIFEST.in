@@ -8,6 +8,6 @@ include doc/source/_templates/*.html
 
 include README.rst
 
-include distribute_setup.py
+include ez_setup.py
 include Makefile.in
 include codepy/include/codepy/*.hpp
