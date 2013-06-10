@@ -10,7 +10,7 @@ except ImportError:
     from distutils.command.build_py import build_py
 
 setup(name="codepy",
-      version="2013.1.1",
+      version="2013.1.2",
       description="Generate and execute native code at run time.",
       long_description=open("README.rst", "rt").read(),
       classifiers=[
