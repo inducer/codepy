@@ -7,16 +7,12 @@ from pytools import Record
 __copyright__ = "Copyright (C) 2008 Andreas Kloeckner"
 
 
-
-
 def _erase_dir(dir):
     from os import listdir, unlink, rmdir
     from os.path import join
     for name in listdir(dir):
         unlink(join(dir, name))
     rmdir(dir)
-
-
 
 
 def extension_file_from_string(toolchain, ext_file, source_string,
@@ -43,10 +39,9 @@ def extension_file_from_string(toolchain, ext_file, source_string,
         _erase_dir(src_dir)
 
 
-
-
 class CleanupBase(object):
     pass
+
 
 class CleanupManager(CleanupBase):
     def __init__(self):
@@ -63,6 +58,7 @@ class CleanupManager(CleanupBase):
         for c in self.cleanups:
             c.error_clean_up()
 
+
 class TempDirManager(CleanupBase):
     def __init__(self, cleanup_m):
         from tempfile import mkdtemp
@@ -78,6 +74,7 @@ class TempDirManager(CleanupBase):
 
     def error_clean_up(self):
         pass
+
 
 class CacheLockManager(CleanupBase):
     def __init__(self, cleanup_m, cache_dir):
@@ -114,6 +111,7 @@ class CacheLockManager(CleanupBase):
 
     def error_clean_up(self):
         pass
+
 
 class ModuleCacheDirManager(CleanupBase):
     def __init__(self, cleanup_m, path):
@@ -183,17 +181,12 @@ def extension_from_string(toolchain, name, source_string,
     return load_dynamic(mod_name, ext_file)
 
 
-
-
 class _InvalidInfoFile(RuntimeError):
     pass
 
 
-
 class _SourceInfo(Record):
     pass
-
-
 
 
 def compile_from_string(toolchain, name, source_string,
@@ -243,7 +236,6 @@ def compile_from_string(toolchain, name, source_string,
     from os.path import join
 
     if cache_dir is None:
-        from os.path import exists
         from tempfile import gettempdir
         cache_dir = join(gettempdir(),
                 "codepy-compiler-cache-v5-uid%s" % os.getuid())
@@ -308,7 +300,6 @@ def compile_from_string(toolchain, name, source_string,
         finally:
             info_file.close()
 
-
     def check_deps(deps):
         for name, date, md5sum in deps:
             try:
@@ -347,7 +338,9 @@ def compile_from_string(toolchain, name, source_string,
     cleanup_m = CleanupManager()
 
     try:
-        lock_m = CacheLockManager(cleanup_m, cache_dir)
+        # Variable 'lock_m' is used for no other purpose than
+        # to keep lock manager alive.
+        lock_m = CacheLockManager(cleanup_m, cache_dir)  # noqa
 
         hex_checksum = calculate_hex_checksum()
         mod_name = "codepy.temp.%s.%s" % (hex_checksum, name)
@@ -355,38 +348,31 @@ def compile_from_string(toolchain, name, source_string,
             suffix = toolchain.o_ext
         else:
             suffix = toolchain.so_ext
-        if cache_dir:
-            mod_cache_dir_m = ModuleCacheDirManager(cleanup_m,
-                    join(cache_dir, hex_checksum))
-            info_path = mod_cache_dir_m.sub("info")
-            ext_file = mod_cache_dir_m.sub(name+suffix)
 
-            if mod_cache_dir_m.existed:
-                try:
-                    info = load_info(info_path)
-                except _InvalidInfoFile:
-                    mod_cache_dir_m.reset()
+        mod_cache_dir_m = ModuleCacheDirManager(cleanup_m,
+                join(cache_dir, hex_checksum))
+        info_path = mod_cache_dir_m.sub("info")
+        ext_file = mod_cache_dir_m.sub(name+suffix)
 
-                    if debug_recompile:
-                        print "recompiling for invalid cache dir (%s)." % (
-                                mod_cache_dir_m.path)
-                else:
-                    if check_deps(info.dependencies) and check_source(
-                            mod_cache_dir_m.sub(info.source_name)):
-                        return hex_checksum, mod_name, ext_file, False
-            else:
+        if mod_cache_dir_m.existed:
+            try:
+                info = load_info(info_path)
+            except _InvalidInfoFile:
+                mod_cache_dir_m.reset()
+
                 if debug_recompile:
-                    print "recompiling for non-existent cache dir (%s)." % (
+                    print "recompiling for invalid cache dir (%s)." % (
                             mod_cache_dir_m.path)
-
-            source_path = mod_cache_dir_m.sub(source_name)
+            else:
+                if check_deps(info.dependencies) and check_source(
+                        mod_cache_dir_m.sub(info.source_name)):
+                    return hex_checksum, mod_name, ext_file, False
         else:
-            ext_file = join(temp_dir, source_name+suffix)
-            done_path = None
-            info_path = None
+            if debug_recompile:
+                print "recompiling for non-existent cache dir (%s)." % (
+                        mod_cache_dir_m.path)
 
-            temp_dir_m = TempDirManager(cleanup_m)
-            source_path = temp_dir_m.sub(source_name)
+        source_path = mod_cache_dir_m.sub(source_name)
 
         write_source(source_path)
 
@@ -411,8 +397,6 @@ def compile_from_string(toolchain, name, source_string,
         cleanup_m.clean_up()
 
 
-
-
 def link_extension(toolchain, objects, mod_name, cache_dir=None,
         debug=False, wait_on_error=True):
     import os.path
@@ -435,9 +419,6 @@ def link_extension(toolchain, objects, mod_name, cache_dir=None,
     return load_dynamic(mod_name, destination)
 
 
-
-
 from pytools import MovedFunctionDeprecationWrapper
 from codepy.toolchain import guess_toolchain as _gtc
 guess_toolchain = MovedFunctionDeprecationWrapper(_gtc)
-
