@@ -281,8 +281,8 @@ def compile_from_string(toolchain, name, source_string,
             import md5
             checksum = md5.new()
 
-        checksum.update(source_string)
-        checksum.update(str(toolchain.abi_id()))
+        checksum.update(source_string.encode('utf-8'))
+        checksum.update(str(toolchain.abi_id()).encode('utf-8'))
         return checksum.hexdigest()
 
     def load_info(info_path):
