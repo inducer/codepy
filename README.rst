@@ -1,3 +1,6 @@
+.. image:: https://badge.fury.io/py/codepy.png
+    :target: http://pypi.python.org/pypi/codepy
+
 CodePy is a C/C++ metaprogramming toolkit for Python. It helps you compile
 source code and dynamically load it into the Python interpreter.
 This facility also works in conjunction with with `PyCuda
