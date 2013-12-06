@@ -429,6 +429,19 @@ def guess_toolchain():
                 kwargs["cflags"].extend(['-arch', 'i386'])
 
         return GCCToolchain(**kwargs)
+    elif "Apple LLVM" in version and "clang" in version:
+        if "-Wstrict-prototypes" in kwargs["cflags"]:
+            kwargs["cflags"].remove("-Wstrict-prototypes")
+        if "darwin" in version:
+            # Are we running in 32-bit mode?
+            # The python interpreter may have been compiled as a Fat binary
+            # So we need to check explicitly how we're running
+            # And update the cflags accordingly
+            import sys
+            if sys.maxint == 0x7fffffff:
+                kwargs["cflags"].extend(['-arch', 'i386'])
+
+        return GCCToolchain(**kwargs)
     else:
         raise ToolchainGuessError("unknown compiler")
 
