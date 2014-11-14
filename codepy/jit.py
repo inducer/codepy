@@ -176,7 +176,7 @@ def extension_from_string(toolchain, name, source_string,
                             source_name,
                             cache_dir, debug, wait_on_error, debug_recompile,
                             False)
-     # try loading it
+    # try loading it
     from imp import load_dynamic
     return load_dynamic(mod_name, ext_file)
 
@@ -236,12 +236,15 @@ def compile_from_string(toolchain, name, source_string,
     from os.path import join
 
     if cache_dir is None:
-        from tempfile import gettempdir
-        cache_dir = join(gettempdir(),
-                "codepy-compiler-cache-v5-uid%s" % os.getuid())
+        import appdirs
+        import sys
+        cache_dir = join(
+                appdirs.user_cache_dir("codepy", "codepy"),
+                "codepy-compiler-cache-v5-py%s" % (
+                    ".".join(str(i) for i in sys.version_info),))
 
         try:
-            os.mkdir(cache_dir)
+            os.makedirs(cache_dir)
         except OSError, e:
             from errno import EEXIST
             if e.errno != EEXIST:
