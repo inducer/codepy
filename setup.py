@@ -33,7 +33,8 @@ setup(name="codepy",
 
       packages=["codepy", "codepy.cgen"],
       install_requires=[
-          "pytools>=8",
+          "pytools>=2015.1.2",
+          "numpy>=1.6",
           "appdirs>=1.4.0",
           "cgen",
           ],
