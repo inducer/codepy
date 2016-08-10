@@ -12,3 +12,5 @@ setuptools.pth
 distribute*egg
 distribute*tar.gz
 .idea
+
+.cache
