@@ -416,10 +416,10 @@ def guess_toolchain():
     if result != 0:
         raise ToolchainGuessError("compiler version query failed: "+stderr)
 
-    if "Free Software Foundation" in version:
+    if "Free Software Foundation" in str(version):
         if "-Wstrict-prototypes" in kwargs["cflags"]:
             kwargs["cflags"].remove("-Wstrict-prototypes")
-        if "darwin" in version:
+        if "darwin" in str(version):
             # Are we running in 32-bit mode?
             # The python interpreter may have been compiled as a Fat binary
             # So we need to check explicitly how we're running

@@ -26,7 +26,7 @@ setup(name="codepy",
           'Topic :: Utilities',
           ],
 
-      author=u"Andreas Kloeckner",
+      author="Andreas Kloeckner",
       url="http://mathema.tician.de/software/codepy",
       author_email="inform@tiker.net",
       license="MIT",
