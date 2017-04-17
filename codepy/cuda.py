@@ -21,6 +21,7 @@ class CudaModule(object):
         self.body = []
         self.boost_module = boost_module
         self.boost_module.add_to_preamble([cgen.Include('cuda.h')])
+        self.add_to_preamble([cgen.Include('cuda.h')])
 
     def add_to_preamble(self, pa):
         self.preamble.extend(pa)
