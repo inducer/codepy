@@ -286,7 +286,10 @@ def compile_from_string(toolchain, name, source_string,
             import md5
             checksum = md5.new()
 
-        checksum.update(source_string.encode('utf-8'))
+        if source_is_binary:
+            checksum.update(source_string)
+        else:
+            checksum.update(source_string.encode('utf-8'))
         checksum.update(str(toolchain.abi_id()).encode('utf-8'))
         return checksum.hexdigest()
 
