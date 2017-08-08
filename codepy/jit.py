@@ -262,7 +262,7 @@ def compile_from_string(toolchain, name, source_string,
             checksum = md5.new()
 
         inf = open(fname)
-        checksum.update(inf.read())
+        checksum.update(inf.read().encode(inf.encoding))
         inf.close()
         return checksum.hexdigest()
 
@@ -391,7 +391,7 @@ def compile_from_string(toolchain, name, source_string,
 
         if info_path is not None:
             from cPickle import dump
-            info_file = open(info_path, "w")
+            info_file = open(info_path, "wb")
             dump(_SourceInfo(
                 dependencies=get_dep_structure(source_path),
                 source_name=source_name), info_file)

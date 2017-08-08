@@ -124,7 +124,6 @@ class Toolchain(Record):
 
 class GCCLikeToolchain(Toolchain):
     def get_version(self):
-        from pytools.prefork import call_capture_output
         result, stdout, stderr = call_capture_output([self.cc, "--version"])
         if result != 0:
             raise RuntimeError("version query failed: "+stderr)
@@ -135,8 +134,6 @@ class GCCLikeToolchain(Toolchain):
 
     def get_dependencies(self, source_files):
         from codepy.tools import join_continued_lines
-
-        from pytools.prefork import call_capture_output
         result, stdout, stderr = call_capture_output(
                 [self.cc]
                 + ["-M"]
@@ -317,7 +314,6 @@ class NVCCToolchain(GCCLikeToolchain):
                 + ["-o", ext_file]
                 )
 
-        from pytools.prefork import call_capture_output
         if debug:
             print " ".join(cc_cmdline)
 
@@ -395,13 +391,20 @@ def _guess_toolchain_kwargs_from_python_config():
                 make_vars["INCLUDEPY"]
                 ],
             library_dirs=[make_vars["LIBDIR"]],
-            so_ext=make_vars["SO"],
+            so_ext=make_vars["SO"] if 'SO' in make_vars else '.so',
             o_ext=object_suffix,
             defines=defines,
             undefines=undefines,
             )
 
 
+def call_capture_output(*args):
+    from pytools.prefork import call_capture_output
+    import sys
+
+    encoding = sys.getdefaultencoding()
+    result, stdout, stderr = call_capture_output(*args)
+    return result, stdout.decode(encoding), stderr.decode(encoding)
 
 
 def guess_toolchain():
@@ -410,8 +413,6 @@ def guess_toolchain():
     Raise :exc:`ToolchainGuessError` if no toolchain could be found.
     """
     kwargs = _guess_toolchain_kwargs_from_python_config()
-
-    from pytools.prefork import call_capture_output
     result, version, stderr = call_capture_output([kwargs["cc"], "--version"])
     if result != 0:
         raise ToolchainGuessError("compiler version query failed: "+stderr)
