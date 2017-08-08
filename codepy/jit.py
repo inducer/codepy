@@ -262,7 +262,12 @@ def compile_from_string(toolchain, name, source_string,
             checksum = md5.new()
 
         inf = open(fname)
-        checksum.update(inf.read().encode(inf.encoding))
+        if inf.encoding is not None:
+            # py3
+            checksum.update(inf.read().encode(inf.encoding))
+        else:
+            checksum.update(inf.read().encode())
+
         inf.close()
         return checksum.hexdigest()
 
