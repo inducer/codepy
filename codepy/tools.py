@@ -11,7 +11,11 @@ def join_continued_lines(lines):
     append_line = False
     try:
         while True:
-            line = it.next().rstrip("\n")
+            try:
+                line = it.next().rstrip("\n")
+            except AttributeError:
+                # py3
+                line = next(it).rstrip("\n")
             append_next_line = line.endswith("\\")
             if append_next_line:
                 line = line[:-1]

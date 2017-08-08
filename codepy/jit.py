@@ -192,7 +192,7 @@ class _SourceInfo(Record):
 def compile_from_string(toolchain, name, source_string,
                         source_name="module.cpp", cache_dir=None,
                         debug=False, wait_on_error=None, debug_recompile=True,
-                        object=False):
+                        object=False, source_is_binary=False):
     """Returns a tuple: mod_name, file_name, recompiled.
     mod_name is the name of the module represented by a compiled object,
     file_name is the name of the compiled object, which can be built from the
@@ -225,6 +225,8 @@ def compile_from_string(toolchain, name, source_string,
     If *debug_recompile*, messages are printed indicating whether a
     recompilation is taking place.
 
+    If *source_is_binary*, the source string is a compile object file and
+    should be treated as binary for read/write purposes
     """
 
     if wait_on_error is not None:
@@ -260,7 +262,12 @@ def compile_from_string(toolchain, name, source_string,
             checksum = md5.new()
 
         inf = open(fname)
-        checksum.update(inf.read())
+        if inf.encoding is not None:
+            # py3
+            checksum.update(inf.read().encode(inf.encoding))
+        else:
+            checksum.update(inf.read().encode())
+
         inf.close()
         return checksum.hexdigest()
 
@@ -271,7 +278,7 @@ def compile_from_string(toolchain, name, source_string,
                 if not dep == source_path]
 
     def write_source(name):
-        outf = open(name, "w")
+        outf = open(name, "w" if not source_is_binary else "wb")
         outf.write(str(source_string))
         outf.close()
 
@@ -284,7 +291,10 @@ def compile_from_string(toolchain, name, source_string,
             import md5
             checksum = md5.new()
 
-        checksum.update(source_string.encode('utf-8'))
+        if source_is_binary:
+            checksum.update(source_string)
+        else:
+            checksum.update(source_string.encode('utf-8'))
         checksum.update(str(toolchain.abi_id()).encode('utf-8'))
         return checksum.hexdigest()
 
@@ -323,7 +333,7 @@ def compile_from_string(toolchain, name, source_string,
 
     def check_source(source_path):
         try:
-            src_f = open(source_path, "r")
+            src_f = open(source_path, "r" if not source_is_binary else "rb")
         except IOError:
             if debug_recompile:
                 print ("recompiling because cache directory does "
@@ -386,7 +396,7 @@ def compile_from_string(toolchain, name, source_string,
 
         if info_path is not None:
             from cPickle import dump
-            info_file = open(info_path, "w")
+            info_file = open(info_path, "wb")
             dump(_SourceInfo(
                 dependencies=get_dep_structure(source_path),
                 source_name=source_name), info_file)
