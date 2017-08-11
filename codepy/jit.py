@@ -230,10 +230,10 @@ def compile_from_string(toolchain, name, source_string,
     """
 
     # first ensure that source strings and names are lists
-    if not isinstance(source_string, list):
+    if isinstance(source_string, str):
         source_string = [source_string]
 
-    if not isinstance(source_name, list):
+    if isinstance(source_name, str):
         source_name = [source_name]
 
     if wait_on_error is not None:
