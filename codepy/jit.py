@@ -190,13 +190,13 @@ class _SourceInfo(Record):
 
 
 def compile_from_string(toolchain, name, source_string,
-                        source_name="module.cpp", cache_dir=None,
+                        source_name=["module.cpp"], cache_dir=None,
                         debug=False, wait_on_error=None, debug_recompile=True,
                         object=False, source_is_binary=False):
     """Returns a tuple: mod_name, file_name, recompiled.
     mod_name is the name of the module represented by a compiled object,
     file_name is the name of the compiled object, which can be built from the
-    source code in *source_string* if necessary,
+    source code(s) in *source_strings* if necessary,
     recompiled is True if the object had to be recompiled, False if the cache
     is hit.
     Raise :exc:`CompileError` in case of error.  The mod_name and file_name
@@ -228,6 +228,13 @@ def compile_from_string(toolchain, name, source_string,
     If *source_is_binary*, the source string is a compile object file and
     should be treated as binary for read/write purposes
     """
+
+    # first ensure that source strings and names are lists
+    if isinstance(source_string, str):
+        source_string = [source_string]
+
+    if isinstance(source_name, str):
+        source_name = [source_name]
 
     if wait_on_error is not None:
         from warnings import warn
@@ -271,16 +278,17 @@ def compile_from_string(toolchain, name, source_string,
         inf.close()
         return checksum.hexdigest()
 
-    def get_dep_structure(source_path):
-        deps = list(toolchain.get_dependencies([source_path]))
+    def get_dep_structure(source_paths):
+        deps = list(toolchain.get_dependencies(source_paths))
         deps.sort()
         return [(dep, os.stat(dep).st_mtime, get_file_md5sum(dep)) for dep in deps
-                if not dep == source_path]
+                if dep not in source_paths]
 
     def write_source(name):
-        outf = open(name, "w" if not source_is_binary else "wb")
-        outf.write(str(source_string))
-        outf.close()
+        for i, source in enumerate(source_string):
+            outf = open(name[i], "w" if not source_is_binary else "wb")
+            outf.write(str(source))
+            outf.close()
 
     def calculate_hex_checksum():
         try:
@@ -291,10 +299,11 @@ def compile_from_string(toolchain, name, source_string,
             import md5
             checksum = md5.new()
 
-        if source_is_binary:
-            checksum.update(source_string)
-        else:
-            checksum.update(source_string.encode('utf-8'))
+        for source in source_string:
+            if source_is_binary:
+                checksum.update(source)
+            else:
+                checksum.update(source.encode('utf-8'))
         checksum.update(str(toolchain.abi_id()).encode('utf-8'))
         return checksum.hexdigest()
 
@@ -332,20 +341,23 @@ def compile_from_string(toolchain, name, source_string,
         return True
 
     def check_source(source_path):
-        try:
-            src_f = open(source_path, "r" if not source_is_binary else "rb")
-        except IOError:
-            if debug_recompile:
-                print ("recompiling because cache directory does "
-                        "not contain source file '%s'." % source_path)
-            return False
+        valid = True
+        for i, path in enumerate(source_path):
+            source = source_string[i]
+            try:
+                src_f = open(path, "r" if not source_is_binary else "rb")
+            except IOError:
+                if debug_recompile:
+                    print ("recompiling because cache directory does "
+                            "not contain source file '%s'." % path)
+                return False
 
-        valid = src_f.read() == source_string
-        src_f.close()
+            valid = valid and src_f.read() == source
+            src_f.close()
 
-        if not valid:
-            from warnings import warn
-            warn("hash collision in compiler cache")
+            if not valid:
+                from warnings import warn
+                warn("hash collision in compiler cache")
         return valid
 
     cleanup_m = CleanupManager()
@@ -385,20 +397,20 @@ def compile_from_string(toolchain, name, source_string,
                 print "recompiling for non-existent cache dir (%s)." % (
                         mod_cache_dir_m.path)
 
-        source_path = mod_cache_dir_m.sub(source_name)
+        source_paths = [mod_cache_dir_m.sub(source) for source in source_name]
 
-        write_source(source_path)
+        write_source(source_paths)
 
         if object:
-            toolchain.build_object(ext_file, [source_path], debug=debug)
+            toolchain.build_object(ext_file, source_paths, debug=debug)
         else:
-            toolchain.build_extension(ext_file, [source_path], debug=debug)
+            toolchain.build_extension(ext_file, source_paths, debug=debug)
 
         if info_path is not None:
             from cPickle import dump
             info_file = open(info_path, "wb")
             dump(_SourceInfo(
-                dependencies=get_dep_structure(source_path),
+                dependencies=get_dep_structure(source_paths),
                 source_name=source_name), info_file)
             info_file.close()
 
