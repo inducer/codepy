@@ -287,7 +287,7 @@ def compile_from_string(toolchain, name, source_string,
     def write_source(name):
         for i, source in enumerate(source_string):
             outf = open(name[i], "w" if not source_is_binary else "wb")
-            outf.write(str(source))
+            outf.write(source)
             outf.close()
 
     def calculate_hex_checksum():
