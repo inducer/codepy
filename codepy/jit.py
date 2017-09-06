@@ -315,7 +315,7 @@ def compile_from_string(toolchain, name, source_string,
             from pickle import load
 
         try:
-            info_file = open(info_path)
+            info_file = open(info_path, 'rb')
         except IOError:
             raise _InvalidInfoFile()
 
