@@ -230,7 +230,7 @@ def compile_from_string(toolchain, name, source_string,
     """
 
     # first ensure that source strings and names are lists
-    if isinstance(source_string, str):
+    if isinstance(source_string, str) or isinstance(source_string, bytes):
         source_string = [source_string]
 
     if isinstance(source_name, str):
@@ -254,7 +254,7 @@ def compile_from_string(toolchain, name, source_string,
 
         try:
             os.makedirs(cache_dir)
-        except OSError, e:
+        except OSError as e:
             from errno import EEXIST
             if e.errno != EEXIST:
                 raise
@@ -308,7 +308,11 @@ def compile_from_string(toolchain, name, source_string,
         return checksum.hexdigest()
 
     def load_info(info_path):
-        from cPickle import load
+        try:
+            from cPickle import load
+        except ImportError:
+            # py3
+            from pickle import load
 
         try:
             info_file = open(info_path)
@@ -326,7 +330,7 @@ def compile_from_string(toolchain, name, source_string,
         for name, date, md5sum in deps:
             try:
                 possibly_updated = os.stat(name).st_mtime != date
-            except OSError, e:
+            except OSError as e:
                 if debug_recompile:
                     print("recompiling because dependency %s is "
                     "inaccessible (%s)." % (name, e))
@@ -386,16 +390,16 @@ def compile_from_string(toolchain, name, source_string,
                 mod_cache_dir_m.reset()
 
                 if debug_recompile:
-                    print "recompiling for invalid cache dir (%s)." % (
-                            mod_cache_dir_m.path)
+                    print("recompiling for invalid cache dir (%s)." % (
+                            mod_cache_dir_m.path))
             else:
                 if check_deps(info.dependencies) and check_source(
                         [mod_cache_dir_m.sub(x) for x in info.source_name]):
                     return hex_checksum, mod_name, ext_file, False
         else:
             if debug_recompile:
-                print "recompiling for non-existent cache dir (%s)." % (
-                        mod_cache_dir_m.path)
+                print("recompiling for non-existent cache dir (%s)." % (
+                        mod_cache_dir_m.path))
 
         source_paths = [mod_cache_dir_m.sub(source) for source in source_name]
 
@@ -407,7 +411,12 @@ def compile_from_string(toolchain, name, source_string,
             toolchain.build_extension(ext_file, source_paths, debug=debug)
 
         if info_path is not None:
-            from cPickle import dump
+            try:
+                from cPickle import dump
+            except ImportError:
+                # py3
+                from pickle import dump
+
             info_file = open(info_path, "wb")
             dump(_SourceInfo(
                 dependencies=get_dep_structure(source_paths),
