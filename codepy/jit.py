@@ -390,7 +390,7 @@ def compile_from_string(toolchain, name, source_string,
                             mod_cache_dir_m.path)
             else:
                 if check_deps(info.dependencies) and check_source(
-                        mod_cache_dir_m.sub(info.source_name)):
+                        [mod_cache_dir_m.sub(x) for x in info.source_name]):
                     return hex_checksum, mod_name, ext_file, False
         else:
             if debug_recompile:
