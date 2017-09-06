@@ -2,6 +2,7 @@ from codepy.toolchain import guess_toolchain
 from codepy.jit import compile_from_string
 from ctypes import CDLL
 
+
 def test():
     toolchain = guess_toolchain()
 
@@ -13,8 +14,6 @@ def test():
         }
     }
     """
-
-
     # compile to object file
     _, _, obj_path, _ = compile_from_string(toolchain, 'module', MODULE_CODE,
                                             object=True)
