@@ -5,9 +5,9 @@ from __future__ import division
 __copyright__ = "Copyright (C) 2008 Andreas Kloeckner"
 
 
-
-
 from pytools import memoize
+import six
+
 
 def search_on_path(filenames):
     """Find file on system path."""
@@ -18,7 +18,6 @@ def search_on_path(filenames):
 
     search_path = environ["PATH"]
 
-    file_found = 0
     paths = search_path.split(pathsep)
     for path in paths:
         for filename in filenames:
@@ -26,7 +25,8 @@ def search_on_path(filenames):
                 return abspath(join(path, filename))
 
 
-# aksetup handling ------------------------------------------------------------
+# {{{ aksetup handling
+
 def expand_str(s, options):
     import re
 
@@ -42,8 +42,9 @@ def expand_str(s, options):
 
     return re.subn(r"\$\{([a-zA-Z0-9_]+)\}", my_repl, s)[0]
 
+
 def expand_value(v, options):
-    if isinstance(v, (str, unicode)):
+    if isinstance(v, (str, six.text_type)):
         return expand_str(v, options)
     elif isinstance(v, list):
         return [expand_value(i, options) for i in v]
@@ -57,17 +58,18 @@ def expand_options(options):
     return options
 
 
-
-
 @memoize
 def get_aksetup_config():
     def update_config(fname):
         import os
         if os.access(fname, os.R_OK):
             filevars = {}
-            execfile(fname, filevars)
 
-            for key, value in filevars.iteritems():
+            with open(fname, "r") as cf_file:
+                file_contents = cf_file.read()
+            exec(compile(file_contents, fname, 'exec'), filevars)
+
+            for key, value in six.iteritems(filevars):
                 if key != "__builtins__":
                     config[key] = value
 
@@ -81,17 +83,16 @@ def get_aksetup_config():
 
     return expand_options(config)
 
+# }}}
 
 
+# {{{ libraries
 
-# libraries -------------------------------------------------------------------
 def get_boost_libname(basename, aksetup):
     try:
         return aksetup["BOOST_%s_LIBNAME" % basename.upper()]
     except KeyError:
         return ["boost_%s" % (basename)]
-
-
 
 
 def add_boost_python(toolchain):
@@ -101,11 +102,11 @@ def add_boost_python(toolchain):
             "boost-python",
             aksetup.get("BOOST_INC_DIR", []),
             aksetup.get("BOOST_LIB_DIR", []),
-            get_boost_libname("python", aksetup)
-            + ["python%d.%d" %  sys.version_info[:2]]
+            get_boost_libname("python-py%d%d" % sys.version_info[:2], aksetup)
+            + ["python%d.%d%s" % (
+                sys.version_info[:2] + (
+                    "m" if sys.version_info[0] >= 3 else "",))]
             )
-
-
 
 
 def add_boost_numeric_bindings(toolchain):
@@ -113,8 +114,6 @@ def add_boost_numeric_bindings(toolchain):
     toolchain.add_library(
             "boost-numeric-bindings",
             aksetup.get("BOOST_BINDINGS_INC_DIR", []), [], [])
-
-
 
 
 def add_numpy(toolchain):
@@ -127,8 +126,6 @@ def add_numpy(toolchain):
     toolchain.add_library("numpy", [get_numpy_incpath()], [], [])
 
 
-
-
 def add_py_module(toolchain, name):
     def get_module_include_path(name):
         from pkg_resources import Requirement, resource_filename
@@ -137,11 +134,8 @@ def add_py_module(toolchain, name):
     toolchain.add_library(name, [get_module_include_path(name)], [], [])
 
 
-
 def add_codepy(toolchain):
     add_py_module(toolchain, "codepy")
-
-
 
 
 def add_pyublas(toolchain):
@@ -150,14 +144,10 @@ def add_pyublas(toolchain):
     add_py_module(toolchain, "pyublas")
 
 
-
-
 def add_hedge(toolchain):
     add_pyublas(toolchain)
     add_boost_numeric_bindings(toolchain)
     add_py_module(toolchain, "hedge")
-
-
 
 
 def add_cuda(toolchain):
@@ -191,3 +181,7 @@ def add_cuda(toolchain):
     toolchain.add_library('cuda', cuda_include_path,
                           cuda_lib_path + cuda_rt_path,
                           cuda_library + cuda_rt_library)
+
+# }}}
+
+# vim:foldmethod=marker

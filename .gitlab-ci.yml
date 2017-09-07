@@ -1,0 +1,8 @@
+Flake8:
+  script:
+  - curl -L -O -k https://gitlab.tiker.net/inducer/ci-support/raw/master/prepare-and-run-flake8.sh
+  - ". ./prepare-and-run-flake8.sh pyopencl test"
+  tags:
+  - python3.5
+  except:
+  - tags

@@ -3,12 +3,6 @@
 
 from setuptools import setup
 
-try:
-    from distutils.command.build_py import build_py_2to3 as build_py
-except ImportError:
-    # 2.x
-    from distutils.command.build_py import build_py
-
 setup(name="codepy",
       version="2017.1",
       description="Generate and execute native code at run time.",
@@ -47,6 +41,4 @@ setup(name="codepy",
               ]
           },
 
-      # 2to3 invocation
-      cmdclass={'build_py': build_py},
       zip_safe=False)

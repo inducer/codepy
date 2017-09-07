@@ -1,9 +1,6 @@
 """Just-in-time Python extension compilation."""
 
 from __future__ import division
-from codepy import CompileError
-from pytools import Record
-import six
 
 __copyright__ = """
 Copyright (C) 2009-17 Andreas Kloeckner
@@ -29,6 +26,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
+
+from codepy import CompileError
+from pytools import Record
+import six
 
 import logging
 logger = logging.getLogger(__name__)
@@ -297,11 +298,7 @@ def compile_from_string(toolchain, name, source_string,
             checksum = md5.new()
 
         inf = open(fname, "rb")
-        if inf.encoding is not None:
-            # py3
-            checksum.update(inf.read())
-        else:
-            checksum.update(inf.read())
+        checksum.update(inf.read())
 
         inf.close()
         return checksum.hexdigest()
@@ -459,13 +456,14 @@ def link_extension(toolchain, objects, mod_name, cache_dir=None,
     else:
         # put the linked object in the same directory as the first object
         destination_base, first_object = os.path.split(objects[0])
-        destination = os.path.join(destination_base, mod_name
-                                   + toolchain.so_ext)
+        destination = os.path.join(
+                destination_base,
+                mod_name + toolchain.so_ext)
     try:
         toolchain.link_extension(destination, objects, debug=debug)
     except CompileError:
         if wait_on_error:
-            raw_input("Link error, examine %s, then press [Enter]" % objects)
+            six.moves.input("Link error, examine %s, then press [Enter]" % objects)
             raise
 
     # try loading it
@@ -473,6 +471,7 @@ def link_extension(toolchain, objects, mod_name, cache_dir=None,
     return load_dynamic(mod_name, destination)
 
 
-from pytools import MovedFunctionDeprecationWrapper
-from codepy.toolchain import guess_toolchain as _gtc
+from pytools import MovedFunctionDeprecationWrapper  # noqa: E402
+from codepy.toolchain import guess_toolchain as _gtc  # noqa: E402
+
 guess_toolchain = MovedFunctionDeprecationWrapper(_gtc)

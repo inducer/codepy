@@ -2,12 +2,33 @@
 
 from __future__ import division, print_function
 
-__copyright__ = "Copyright (C) 2008,9 Andreas Kloeckner, Bryan Catanzaro"
+__copyright__ = """
+"Copyright (C) 2008,9 Andreas Kloeckner, Bryan Catanzaro
+"""
+
+__license__ = """
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+"""
+
 
 from codepy import CompileError
 from pytools import Record
-
-
 
 
 class Toolchain(Record):
@@ -51,11 +72,11 @@ class Toolchain(Record):
         self.features.add(feature)
 
         for idir in include_dirs:
-            if not idir in self.include_dirs:
+            if idir not in self.include_dirs:
                 self.include_dirs.append(idir)
 
         for ldir in library_dirs:
-            if not ldir in self.library_dirs:
+            if ldir not in self.library_dirs:
                 self.library_dirs.append(ldir)
 
         self.libraries = libraries + self.libraries
@@ -120,7 +141,7 @@ class Toolchain(Record):
         raise NotImplementedError
 
 
-
+# {{{ gcc-like tool chain
 
 class GCCLikeToolchain(Toolchain):
     def get_version(self):
@@ -206,8 +227,10 @@ class GCCLikeToolchain(Toolchain):
                   file=sys.stderr)
             raise CompileError("module compilation failed")
 
+# }}}
 
 
+# {{{ gcc toolchain
 
 class GCCToolchain(GCCLikeToolchain):
     def get_version_tuple(self):
@@ -261,13 +284,15 @@ class GCCToolchain(GCCLikeToolchain):
         else:
             oflags = ["-O%d" % level, "-DNDEBUG"]
 
-            if level >= 2 and self.get_version_tuple() >= (4,3):
+            if level >= 2 and self.get_version_tuple() >= (4, 3):
                 oflags.extend(["-march=native", "-mtune=native", ])
 
         return self.copy(cflags=cflags + oflags)
 
+# }}}
 
 
+# {{{ nvcc
 
 class NVCCToolchain(GCCLikeToolchain):
     def get_version_tuple(self):
@@ -292,7 +317,7 @@ class NVCCToolchain(GCCLikeToolchain):
             load = []
         else:
             ldflags = self.ldflags
-            load =  ["-L%s" % ldir for ldir in self.library_dirs]
+            load = ["-L%s" % ldir for ldir in self.library_dirs]
             load.extend(["-l%s" % lib for lib in self.libraries])
         return (
                 [self.cc]
@@ -332,14 +357,14 @@ class NVCCToolchain(GCCLikeToolchain):
                   file=sys.stderr)
             raise CompileError("module compilation failed")
 
+# }}}
 
 
+# {{{ configuration
 
-
-
-# configuration ---------------------------------------------------------------
 class ToolchainGuessError(Exception):
     pass
+
 
 def _guess_toolchain_kwargs_from_python_config():
     def strip_prefix(pfx, value):
@@ -467,3 +492,7 @@ def guess_nvcc_toolchain():
     kwargs["cc"] = "nvcc"
 
     return NVCCToolchain(**kwargs)
+
+# }}}
+
+# vim: foldmethod=marker
