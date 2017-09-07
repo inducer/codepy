@@ -6,7 +6,7 @@ from ctypes import CDLL
 def test():
     toolchain = guess_toolchain()
 
-    MODULE_CODE = """
+    module_code = """
     extern "C" {
         int const greet()
         {
@@ -15,7 +15,7 @@ def test():
     }
     """
     # compile to object file
-    _, _, obj_path, _ = compile_from_string(toolchain, 'module', MODULE_CODE,
+    _, _, obj_path, _ = compile_from_string(toolchain, 'module', module_code,
                                             object=True)
     # and then to shared lib
     with open(obj_path, 'rb') as file:

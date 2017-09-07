@@ -1,4 +1,4 @@
-from codepy.cgen import *
+import cgen as c
 from codepy.bpl import BoostPythonModule
 from codepy.cuda import CudaModule
 from cgen.cuda import CudaGlobal
@@ -12,7 +12,8 @@ from cgen.cuda import CudaGlobal
 host_mod = BoostPythonModule()
 
 # Are we on a 32 or 64 bit platform?
-import sys, math
+import sys
+import math
 bitness = math.log(sys.maxsize) + 1
 ptr_sz_uint_conv = 'K' if bitness > 32 else 'I'
 
@@ -34,22 +35,26 @@ statements = [
     # Build resulting GPUArray
     'PyObject* args = Py_BuildValue("()")',
     'PyObject* newShape = Py_BuildValue("(i)", intLength)',
-    'PyObject* kwargs = Py_BuildValue("{sOsOs%s}", "shape", newShape, "dtype", type, "gpudata", diffResult)' % ptr_sz_uint_conv,
+
+    'PyObject* kwargs = Py_BuildValue('
+    '"{sOsOs%s}", "shape", newShape, "dtype", type, "gpudata", diffResult)'
+    % ptr_sz_uint_conv,
+
     'PyObject* GPUArrayClass = PyObject_GetAttrString(gpuArray, "__class__")',
     'PyObject* remoteResult = PyObject_Call(GPUArrayClass, args, kwargs)',
     'return remoteResult']
 
 
 host_mod.add_function(
-    FunctionBody(
-        FunctionDeclaration(Pointer(Value("PyObject", "adjacentDifference")),
-                            [Pointer(Value("PyObject", "gpuArray"))]),
-        Block([Statement(x) for x in statements])))
-host_mod.add_to_preamble([Include('boost/python/extract.hpp')])
+    c.FunctionBody(
+        c.FunctionDeclaration(c.Pointer(c.Value("PyObject", "adjacentDifference")),
+                            [c.Pointer(c.Value("PyObject", "gpuArray"))]),
+        c.Block([c.Statement(x) for x in statements])))
+host_mod.add_to_preamble([c.Include('boost/python/extract.hpp')])
 
-                                 
+
 cuda_mod = CudaModule(host_mod)
-cuda_mod.add_to_preamble([Include('cuda.h')])
+cuda_mod.add_to_preamble([c.Include('cuda.h')])
 
 globalIndex = 'int index = blockIdx.x * blockDim.x + threadIdx.x'
 compute_diff = 'outputPtr[index] = inputPtr[index] - inputPtr[index-1]'
@@ -59,39 +64,41 @@ launch = ['CUdeviceptr output',
           'int gSize = (length-1)/bSize + 1',
           'diffKernel<<<gSize, bSize>>>((T*)inputPtr, length, (T*)output)',
           'return output']
-diff =[
-    Template('typename T',
-             CudaGlobal(FunctionDeclaration(Value('void', 'diffKernel'),
-                [Value('T*', 'inputPtr'),
-                 Value('int', 'length'),
-                 Value('T*', 'outputPtr')]))),
-    Block([Statement(globalIndex),
-           If('index == 0',
-              Statement('outputPtr[0] = inputPtr[0]'),
-              If('index < length',
-                 Statement(compute_diff),
-                 Statement('')))]),
 
-    Template('typename T',
-                FunctionDeclaration(Value('CUdeviceptr', 'difference'),
-                                          [Value('CUdeviceptr', 'inputPtr'),
-                                           Value('int', 'length')])),
-    Block([Statement(x) for x in launch])]
+diff = [
+    c.Template('typename T',
+             CudaGlobal(c.FunctionDeclaration(c.Value('void', 'diffKernel'),
+                [c.Value('T*', 'inputPtr'),
+                 c.Value('int', 'length'),
+                 c.Value('T*', 'outputPtr')]))),
+    c.Block([c.Statement(globalIndex),
+           c.If('index == 0',
+              c.Statement('outputPtr[0] = inputPtr[0]'),
+              c.If('index < length',
+                 c.Statement(compute_diff),
+                 c.Statement('')))]),
+
+    c.Template('typename T',
+                c.FunctionDeclaration(c.Value('CUdeviceptr', 'difference'),
+                                          [c.Value('CUdeviceptr', 'inputPtr'),
+                                           c.Value('int', 'length')])),
+    c.Block([c.Statement(x) for x in launch])]
 
 cuda_mod.add_to_module(diff)
-diff_instance = FunctionBody(
-    FunctionDeclaration(Value('CUdeviceptr', 'diffInstance'),
-                        [Value('CUdeviceptr', 'inputPtr'),
-                         Value('int', 'length')]),
-    Block([Statement('return difference<int>(inputPtr, length)')]))
+diff_instance = c.FunctionBody(
+    c.FunctionDeclaration(c.Value('CUdeviceptr', 'diffInstance'),
+                        [c.Value('CUdeviceptr', 'inputPtr'),
+                         c.Value('int', 'length')]),
+    c.Block([c.Statement('return difference<int>(inputPtr, length)')]))
+
 # CudaModule.add_function also adds a declaration of this
 # function to the BoostPythonModule which
 # is responsible for the host function.
 cuda_mod.add_function(diff_instance)
 
+import codepy.jit
+import codepy.toolchain
 
-
-import codepy.jit, codepy.toolchain
 gcc_toolchain = codepy.toolchain.guess_toolchain()
 nvcc_toolchain = codepy.toolchain.guess_nvcc_toolchain()
 
@@ -121,4 +128,3 @@ if error == 0:
 else:
     print("Error should be 0, but is: %s" % error)
     print("Test failed")
-

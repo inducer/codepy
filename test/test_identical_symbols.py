@@ -22,5 +22,6 @@ def test_identical_symbols():
     assert us.greet() != aussie.greet()
     print(us.greet(), aussie.greet())
 
+
 if __name__ == '__main__':
     test_identical_symbols()

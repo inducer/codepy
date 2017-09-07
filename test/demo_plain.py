@@ -24,6 +24,4 @@ add_boost_python(toolchain)
 from codepy.jit import extension_from_string
 cmod = extension_from_string(toolchain, "module", MODULE_CODE)
 
-print cmod.greet()
-
-
+print(cmod.greet())
