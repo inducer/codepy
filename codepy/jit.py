@@ -356,13 +356,13 @@ def compile_from_string(toolchain, name, source_string,
                 possibly_updated = os.stat(name).st_mtime != date
             except OSError as e:
                 if debug_recompile:
-                    print("recompiling because dependency %s is "
+                    logger.info("recompiling because dependency %s is "
                     "inaccessible (%s)." % (name, e))
                 return False
             else:
                 if possibly_updated and md5sum != get_file_md5sum(name):
                     if debug_recompile:
-                        print("recompiling because dependency %s was "
+                        logger.info("recompiling because dependency %s was "
                         "updated." % name)
                     return False
 
@@ -376,7 +376,7 @@ def compile_from_string(toolchain, name, source_string,
                 src_f = open(path, "r" if not source_is_binary else "rb")
             except IOError:
                 if debug_recompile:
-                    print ("recompiling because cache directory does "
+                    logger.info("recompiling because cache directory does "
                             "not contain source file '%s'." % path)
                 return False
 
@@ -414,7 +414,7 @@ def compile_from_string(toolchain, name, source_string,
                 mod_cache_dir_m.reset()
 
                 if debug_recompile:
-                    print("recompiling for invalid cache dir (%s)." % (
+                    logger.info("recompiling for invalid cache dir (%s)." % (
                             mod_cache_dir_m.path))
             else:
                 if check_deps(info.dependencies) and check_source(
@@ -422,7 +422,7 @@ def compile_from_string(toolchain, name, source_string,
                     return hex_checksum, mod_name, ext_file, False
         else:
             if debug_recompile:
-                print("recompiling for non-existent cache dir (%s)." % (
+                logger.info("recompiling for non-existent cache dir (%s)." % (
                         mod_cache_dir_m.path))
 
         source_paths = [mod_cache_dir_m.sub(source) for source in source_name]
