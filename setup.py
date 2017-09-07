@@ -36,6 +36,7 @@ setup(name="codepy",
           "pytools>=2015.1.2",
           "numpy>=1.6",
           "appdirs>=1.4.0",
+          "six",
           "cgen",
           ],
 

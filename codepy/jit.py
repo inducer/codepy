@@ -3,6 +3,7 @@
 from __future__ import division
 from codepy import CompileError
 from pytools import Record
+import six
 
 __copyright__ = "Copyright (C) 2008 Andreas Kloeckner"
 
@@ -230,7 +231,8 @@ def compile_from_string(toolchain, name, source_string,
     """
 
     # first ensure that source strings and names are lists
-    if isinstance(source_string, str):
+    if isinstance(source_string, six.string_types) \
+            or (source_is_binary and isinstance(source_string, six.binary_type)):
         source_string = [source_string]
 
     if isinstance(source_name, str):
@@ -254,7 +256,7 @@ def compile_from_string(toolchain, name, source_string,
 
         try:
             os.makedirs(cache_dir)
-        except OSError, e:
+        except OSError as e:
             from errno import EEXIST
             if e.errno != EEXIST:
                 raise
@@ -287,7 +289,7 @@ def compile_from_string(toolchain, name, source_string,
     def write_source(name):
         for i, source in enumerate(source_string):
             outf = open(name[i], "w" if not source_is_binary else "wb")
-            outf.write(str(source))
+            outf.write(source)
             outf.close()
 
     def calculate_hex_checksum():
@@ -308,10 +310,10 @@ def compile_from_string(toolchain, name, source_string,
         return checksum.hexdigest()
 
     def load_info(info_path):
-        from cPickle import load
+        from six.moves.cPickle import load
 
         try:
-            info_file = open(info_path)
+            info_file = open(info_path, 'rb')
         except IOError:
             raise _InvalidInfoFile()
 
@@ -326,7 +328,7 @@ def compile_from_string(toolchain, name, source_string,
         for name, date, md5sum in deps:
             try:
                 possibly_updated = os.stat(name).st_mtime != date
-            except OSError, e:
+            except OSError as e:
                 if debug_recompile:
                     print("recompiling because dependency %s is "
                     "inaccessible (%s)." % (name, e))
@@ -386,16 +388,16 @@ def compile_from_string(toolchain, name, source_string,
                 mod_cache_dir_m.reset()
 
                 if debug_recompile:
-                    print "recompiling for invalid cache dir (%s)." % (
-                            mod_cache_dir_m.path)
+                    print("recompiling for invalid cache dir (%s)." % (
+                            mod_cache_dir_m.path))
             else:
                 if check_deps(info.dependencies) and check_source(
-                        mod_cache_dir_m.sub(info.source_name)):
+                        [mod_cache_dir_m.sub(x) for x in info.source_name]):
                     return hex_checksum, mod_name, ext_file, False
         else:
             if debug_recompile:
-                print "recompiling for non-existent cache dir (%s)." % (
-                        mod_cache_dir_m.path)
+                print("recompiling for non-existent cache dir (%s)." % (
+                        mod_cache_dir_m.path))
 
         source_paths = [mod_cache_dir_m.sub(source) for source in source_name]
 
@@ -407,7 +409,8 @@ def compile_from_string(toolchain, name, source_string,
             toolchain.build_extension(ext_file, source_paths, debug=debug)
 
         if info_path is not None:
-            from cPickle import dump
+            from six.moves.cPickle import dump
+
             info_file = open(info_path, "wb")
             dump(_SourceInfo(
                 dependencies=get_dep_structure(source_paths),

@@ -1,6 +1,6 @@
 """Toolchains for Just-in-time Python extension compilation."""
 
-from __future__ import division
+from __future__ import division, print_function
 
 __copyright__ = "Copyright (C) 2008,9 Andreas Kloeckner, Bryan Catanzaro"
 
@@ -160,15 +160,15 @@ class GCCLikeToolchain(Toolchain):
 
         from pytools.prefork import call
         if debug:
-            print " ".join(cc_cmdline)
+            print(" ".join(cc_cmdline))
 
         result = call(cc_cmdline)
 
         if result != 0:
             import sys
-            print >> sys.stderr, "FAILED compiler invocation:", \
-                    " ".join(cc_cmdline)
-            raise CompileError, "module compilation failed"
+            print("FAILED compiler invocation:" +
+                  " ".join(cc_cmdline), file=sys.stderr)
+            raise CompileError("module compilation failed")
 
     def build_extension(self, ext_file, source_files, debug=False):
         cc_cmdline = (
@@ -178,15 +178,15 @@ class GCCLikeToolchain(Toolchain):
 
         from pytools.prefork import call
         if debug:
-            print " ".join(cc_cmdline)
+            print(" ".join(cc_cmdline))
 
         result = call(cc_cmdline)
 
         if result != 0:
             import sys
-            print >> sys.stderr, "FAILED compiler invocation:", \
-                    " ".join(cc_cmdline)
-            raise CompileError, "module compilation failed"
+            print("FAILED compiler invocation:" + " ".join(cc_cmdline),
+                  file=sys.stderr)
+            raise CompileError("module compilation failed")
 
     def link_extension(self, ext_file, object_files, debug=False):
         cc_cmdline = (
@@ -196,15 +196,15 @@ class GCCLikeToolchain(Toolchain):
 
         from pytools.prefork import call
         if debug:
-            print " ".join(cc_cmdline)
+            print(" ".join(cc_cmdline))
 
         result = call(cc_cmdline)
 
         if result != 0:
             import sys
-            print >> sys.stderr, "FAILED compiler invocation:", \
-                    " ".join(cc_cmdline)
-            raise CompileError, "module compilation failed"
+            print("FAILED compiler invocation:" + " ".join(cc_cmdline),
+                  file=sys.stderr)
+            raise CompileError("module compilation failed")
 
 
 
@@ -315,23 +315,22 @@ class NVCCToolchain(GCCLikeToolchain):
                 )
 
         if debug:
-            print " ".join(cc_cmdline)
+            print(" ".join(cc_cmdline))
 
         result, stdout, stderr = call_capture_output(cc_cmdline)
-        print stderr
-        print stdout
+        print(stderr)
+        print(stdout)
 
         if "error" in stderr:
             # work around a bug in nvcc, which doesn't provide a non-zero
             # return code even if it failed.
             result = 1
 
-
         if result != 0:
             import sys
-            print >> sys.stderr, "FAILED compiler invocation:", \
-                    " ".join(cc_cmdline)
-            raise CompileError, "module compilation failed"
+            print("FAILED compiler invocation:" + " ".join(cc_cmdline),
+                  file=sys.stderr)
+            raise CompileError("module compilation failed")
 
 
 
