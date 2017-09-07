@@ -11,5 +11,4 @@ mod.add_function(
 from codepy.toolchain import guess_toolchain
 cmod = mod.compile(guess_toolchain())
 
-print cmod.greet()
-
+print(cmod.greet())
