@@ -3,6 +3,7 @@
 from __future__ import division
 from codepy import CompileError
 from pytools import Record
+import six
 
 __copyright__ = "Copyright (C) 2008 Andreas Kloeckner"
 
@@ -230,7 +231,8 @@ def compile_from_string(toolchain, name, source_string,
     """
 
     # first ensure that source strings and names are lists
-    if isinstance(source_string, str) or isinstance(source_string, bytes):
+    if isinstance(source_string, six.string_types) \
+            or (source_is_binary and isinstance(source_string, six.binary_type)):
         source_string = [source_string]
 
     if isinstance(source_name, str):
