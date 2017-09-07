@@ -296,12 +296,12 @@ def compile_from_string(toolchain, name, source_string,
             import md5
             checksum = md5.new()
 
-        inf = open(fname)
+        inf = open(fname, "rb")
         if inf.encoding is not None:
             # py3
-            checksum.update(inf.read().encode(inf.encoding))
+            checksum.update(inf.read())
         else:
-            checksum.update(inf.read().encode())
+            checksum.update(inf.read())
 
         inf.close()
         return checksum.hexdigest()
