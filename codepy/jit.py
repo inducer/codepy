@@ -310,11 +310,7 @@ def compile_from_string(toolchain, name, source_string,
         return checksum.hexdigest()
 
     def load_info(info_path):
-        try:
-            from cPickle import load
-        except ImportError:
-            # py3
-            from pickle import load
+        from six.moves.cPickle import load
 
         try:
             info_file = open(info_path, 'rb')
@@ -413,11 +409,7 @@ def compile_from_string(toolchain, name, source_string,
             toolchain.build_extension(ext_file, source_paths, debug=debug)
 
         if info_path is not None:
-            try:
-                from cPickle import dump
-            except ImportError:
-                # py3
-                from pickle import dump
+            from six.moves.cPickle import dump
 
             info_file = open(info_path, "wb")
             dump(_SourceInfo(
