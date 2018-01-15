@@ -450,7 +450,7 @@ def guess_toolchain():
             # So we need to check explicitly how we're running
             # And update the cflags accordingly
             import sys
-            if sys.maxint == 0x7fffffff:
+            if sys.maxsize == 0x7fffffff:
                 kwargs["cflags"].extend(['-arch', 'i386'])
 
         return GCCToolchain(**kwargs)
@@ -463,7 +463,7 @@ def guess_toolchain():
             # So we need to check explicitly how we're running
             # And update the cflags accordingly
             import sys
-            if sys.maxint == 0x7fffffff:
+            if sys.maxsize == 0x7fffffff:
                 kwargs["cflags"].extend(['-arch', 'i386'])
 
         return GCCToolchain(**kwargs)
