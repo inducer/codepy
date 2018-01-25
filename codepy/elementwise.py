@@ -192,9 +192,6 @@ def make_linear_comb_kernel(scalar_dtypes, vector_dtypes):
             result_dtype, scalar_dtypes, vector_dtypes), result_dtype
 
 
-
-
-
 if __name__ == "__main__":
     import pyublas
 
@@ -214,4 +211,4 @@ if __name__ == "__main__":
     lin_comb(5, a, 6, b, c)
 
     import numpy.linalg as la
-    print la.norm(c - (5*a+6*b))
+    print(la.norm(c - (5*a+6*b)))
