@@ -4,7 +4,7 @@
 from setuptools import setup
 
 setup(name="codepy",
-      version="2017.2",
+      version="2017.2.1",
       description="Generate and execute native code at run time.",
       long_description=open("README.rst", "rt").read(),
       classifiers=[
