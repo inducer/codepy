@@ -1,3 +1,6 @@
+import pytest
+
+
 def make_greet_mod(greeting):
     from cgen import FunctionBody, FunctionDeclaration, Block, \
             Const, Pointer, Value, Statement
@@ -15,6 +18,9 @@ def make_greet_mod(greeting):
     return mod.compile(guess_toolchain(), wait_on_error=True)
 
 
+@pytest.mark.xfail(reason="You probably don't have "
+        "Boost.Python installed where I am looking for it, "
+        "and that's OK.")
 def test_identical_symbols():
     us = make_greet_mod("Hi there")
     aussie = make_greet_mod("G'day")
