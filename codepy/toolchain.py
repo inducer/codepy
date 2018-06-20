@@ -379,8 +379,11 @@ def _guess_toolchain_kwargs_from_python_config():
     cc_cmdline = (make_vars["CXX"].split()
             + make_vars["CFLAGS"].split()
             + make_vars["CFLAGSFORSHARED"].split())
-    object_suffix = '.' + make_vars['MODOBJS'].split()[0].split('.')[1]
-    from os.path import join
+    object_names = [
+            oname for oname in make_vars['OBJECT_OBJS'].split()
+            if "(" not in oname and ")" not in oname]
+
+    object_suffix = '.' + object_names[0].split('.')[1]
 
     cflags = []
     defines = []
@@ -469,8 +472,6 @@ def guess_toolchain():
         return GCCToolchain(**kwargs)
     else:
         raise ToolchainGuessError("unknown compiler")
-
-
 
 
 def guess_nvcc_toolchain():
