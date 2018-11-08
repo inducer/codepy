@@ -105,7 +105,7 @@ class TempDirManager(CleanupBase):
 
 
 class CacheLockManager(CleanupBase):
-    def __init__(self, cleanup_m, cache_dir):
+    def __init__(self, cleanup_m, cache_dir, spinlock):
         import os
 
         if cache_dir is not None:
@@ -119,6 +119,9 @@ class CacheLockManager(CleanupBase):
                     break
                 except OSError:
                     pass
+
+                if spinlock:
+                    continue
 
                 from time import sleep
                 sleep(1)
@@ -172,7 +175,7 @@ class ModuleCacheDirManager(CleanupBase):
 def extension_from_string(toolchain, name, source_string,
                           source_name="module.cpp", cache_dir=None,
                           debug=False, wait_on_error=None,
-                          debug_recompile=True):
+                          debug_recompile=True, spinlock=False):
     """Return a reference to the extension module *name*, which can be built
     from the source code in *source_string* if necessary. Raise
     :exc:`CompileError` in case of error.
@@ -197,6 +200,9 @@ def extension_from_string(toolchain, name, source_string,
 
     If *debug_recompile*, messages are printed indicating whether a
     recompilation is taking place.
+
+    If *spinlock*, do not sleep for 1s before attempting to re-acquire the
+    *cache_dir* lock.
     """
     checksum, mod_name, ext_file, recompiled = \
         compile_from_string(toolchain,
@@ -220,7 +226,7 @@ class _SourceInfo(Record):
 def compile_from_string(toolchain, name, source_string,
                         source_name=["module.cpp"], cache_dir=None,
                         debug=False, wait_on_error=None, debug_recompile=True,
-                        object=False, source_is_binary=False):
+                        object=False, source_is_binary=False, spinlock=False):
     """Returns a tuple: mod_name, file_name, recompiled.
     mod_name is the name of the module represented by a compiled object,
     file_name is the name of the compiled object, which can be built from the
@@ -255,6 +261,9 @@ def compile_from_string(toolchain, name, source_string,
 
     If *source_is_binary*, the source string is a compile object file and
     should be treated as binary for read/write purposes
+
+    If *spinlock*, do not sleep for 1s before attempting to re-acquire the
+    *cache_dir* lock.
     """
 
     # first ensure that source strings and names are lists
@@ -390,7 +399,7 @@ def compile_from_string(toolchain, name, source_string,
     try:
         # Variable 'lock_m' is used for no other purpose than
         # to keep lock manager alive.
-        lock_m = CacheLockManager(cleanup_m, cache_dir)  # noqa
+        lock_m = CacheLockManager(cleanup_m, cache_dir, spinlock)  # noqa
 
         hex_checksum = calculate_hex_checksum()
         mod_name = "codepy.temp.%s.%s" % (hex_checksum, name)
