@@ -105,7 +105,7 @@ class TempDirManager(CleanupBase):
 
 
 class CacheLockManager(CleanupBase):
-    def __init__(self, cleanup_m, cache_dir):
+    def __init__(self, cleanup_m, cache_dir, sleep_delay=1):
         import os
 
         if cache_dir is not None:
@@ -121,7 +121,7 @@ class CacheLockManager(CleanupBase):
                     pass
 
                 from time import sleep
-                sleep(1)
+                sleep(sleep_delay)
 
                 attempts += 1
 
@@ -172,7 +172,7 @@ class ModuleCacheDirManager(CleanupBase):
 def extension_from_string(toolchain, name, source_string,
                           source_name="module.cpp", cache_dir=None,
                           debug=False, wait_on_error=None,
-                          debug_recompile=True):
+                          debug_recompile=True, sleep_delay=1):
     """Return a reference to the extension module *name*, which can be built
     from the source code in *source_string* if necessary. Raise
     :exc:`CompileError` in case of error.
@@ -180,10 +180,12 @@ def extension_from_string(toolchain, name, source_string,
     Compiled code is cached in *cache_dir* and available immediately if it has
     been compiled at some point in the past. Compiler and Python API versions
     as well as versions of include files are taken into account when examining
-    the cache. If *cache_dir* is ``None``, a default location is assumed.
-    If it is ``False``, no caching is performed. Proper locking is performed
-    on the cache directory. Simultaneous use of the cache by multiple
-    processes works as expected, but may lead to delays because of locking.
+    the cache. If *cache_dir* is ``None``, a default location is assumed.  If
+    it is ``False``, no caching is performed. Proper locking is performed on
+    the cache directory. Simultaneous use of the cache by multiple processes
+    works as expected, but may lead to delays because of locking.  By default,
+    a process waits for 1 second before reattempting to acquire the *cache_dir*
+    lock. A different waiting time can be specified through *sleep_delay*.
 
     The code in *source_string* will be saved to a temporary file named
     *source_name* if it needs to be compiled.
@@ -199,11 +201,9 @@ def extension_from_string(toolchain, name, source_string,
     recompilation is taking place.
     """
     checksum, mod_name, ext_file, recompiled = \
-        compile_from_string(toolchain,
-                            name, source_string,
-                            source_name,
+        compile_from_string(toolchain, name, source_string, source_name,
                             cache_dir, debug, wait_on_error, debug_recompile,
-                            False)
+                            False, sleep_delay=sleep_delay)
     # try loading it
     from imp import load_dynamic
     return load_dynamic(mod_name, ext_file)
@@ -220,7 +220,7 @@ class _SourceInfo(Record):
 def compile_from_string(toolchain, name, source_string,
                         source_name=["module.cpp"], cache_dir=None,
                         debug=False, wait_on_error=None, debug_recompile=True,
-                        object=False, source_is_binary=False):
+                        object=False, source_is_binary=False, sleep_delay=1):
     """Returns a tuple: mod_name, file_name, recompiled.
     mod_name is the name of the module represented by a compiled object,
     file_name is the name of the compiled object, which can be built from the
@@ -231,14 +231,15 @@ def compile_from_string(toolchain, name, source_string,
     are designed to be used with load_dynamic to load a python module from
     this object, if desired.
 
-    Compiled code is cached in *cache_dir* and available immediately if it
-    has been compiled at some point in the past.  Compiler and Python API
-    versions as well as versions of include files are taken into account when
-    examining the cache. If *cache_dir* is ``None``, a default location is
-    assumed. If it is ``False``, no caching is perfomed.  Proper locking is
-    performed on the cache directory.  Simultaneous use of the cache by
-    multiple processes works as expected, but may lead to delays because of
-    locking.
+    Compiled code is cached in *cache_dir* and available immediately if it has
+    been compiled at some point in the past.  Compiler and Python API versions
+    as well as versions of include files are taken into account when examining
+    the cache. If *cache_dir* is ``None``, a default location is assumed. If it
+    is ``False``, no caching is perfomed.  Proper locking is performed on the
+    cache directory.  Simultaneous use of the cache by multiple processes works
+    as expected, but may lead to delays because of locking. By default, a
+    process waits for 1 second before reattempting to acquire the *cache_dir*
+    lock. A different waiting time can be specified through *sleep_delay*.
 
     The code in *source_string* will be saved to a temporary file named
     *source_name* if it needs to be compiled.
@@ -390,7 +391,7 @@ def compile_from_string(toolchain, name, source_string,
     try:
         # Variable 'lock_m' is used for no other purpose than
         # to keep lock manager alive.
-        lock_m = CacheLockManager(cleanup_m, cache_dir)  # noqa
+        lock_m = CacheLockManager(cleanup_m, cache_dir, sleep_delay)  # noqa
 
         hex_checksum = calculate_hex_checksum()
         mod_name = "codepy.temp.%s.%s" % (hex_checksum, name)
