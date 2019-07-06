@@ -442,7 +442,7 @@ def compile_from_string(toolchain, name, source_string,
             info_file.close()
 
         return hex_checksum, mod_name, ext_file, True
-    except:
+    except Exception:
         cleanup_m.error_clean_up()
         raise
     finally:

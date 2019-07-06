@@ -187,8 +187,8 @@ class GCCLikeToolchain(Toolchain):
 
         if result != 0:
             import sys
-            print("FAILED compiler invocation:" +
-                  " ".join(cc_cmdline), file=sys.stderr)
+            print("FAILED compiler invocation:"
+                  + " ".join(cc_cmdline), file=sys.stderr)
             raise CompileError("module compilation failed")
 
     def build_extension(self, ext_file, source_files, debug=False):

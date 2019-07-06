@@ -2,8 +2,6 @@ import cgen
 """Convenience interface for using CodePy with CUDA"""
 
 
-
-
 class CudaModule(object):
     def __init__(self, boost_module, name="module"):
         """*boost_module* is a codepy.BoostPythonModule containing host code
@@ -68,7 +66,7 @@ class CudaModule(object):
         host_code = str(self.boost_module.generate()) + "\n"
         device_code = str(self.generate()) + "\n"
 
-        from codepy.jit import compile_from_string, extension_from_string
+        from codepy.jit import compile_from_string
         from codepy.jit import link_extension
 
         local_host_kwargs = kwargs.copy()
@@ -78,12 +76,14 @@ class CudaModule(object):
 
         # Don't compile shared objects, just normal objects
         # (on some platforms, they're different)
-        host_checksum, host_mod_name, host_object, host_compiled = compile_from_string(
-            host_toolchain, self.boost_module.name, host_code,
-            object=True, **local_host_kwargs)
-        device_checksum, device_mod_name, device_object, device_compiled = compile_from_string(
-            nvcc_toolchain, 'gpu', device_code, 'gpu.cu',
-            object=True, **local_nvcc_kwargs)
+        host_checksum, host_mod_name, host_object, host_compiled = \
+                compile_from_string(
+                        host_toolchain, self.boost_module.name, host_code,
+                        object=True, **local_host_kwargs)
+        device_checksum, device_mod_name, device_object, device_compiled = \
+                compile_from_string(
+                        nvcc_toolchain, 'gpu', device_code, 'gpu.cu',
+                        object=True, **local_nvcc_kwargs)
         # The name of the shared lib depends on the hex checksums of both
         # host and device code to prevent accidentially returned a cached
         # module with wrong linkage
@@ -102,7 +102,7 @@ class CudaModule(object):
             try:
                 from imp import load_dynamic
                 return load_dynamic(mod_name, module_path)
-            except:
+            except Exception:
                 return link_extension(host_toolchain,
                                       [host_object, device_object],
                                       mod_name, **kwargs)
