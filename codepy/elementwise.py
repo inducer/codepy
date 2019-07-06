@@ -5,13 +5,9 @@ from __future__ import division
 __copyright__ = "Copyright (C) 2009 Andreas Kloeckner"
 
 
-
-
 from pytools import memoize
 import numpy
 from cgen import POD, Value, dtype_to_ctype
-
-
 
 
 class Argument:
@@ -25,6 +21,7 @@ class Argument:
                 self.name,
                 self.dtype)
 
+
 class VectorArg(Argument):
     def declarator(self):
         return Value("numpy_array<%s >" % dtype_to_ctype(self.dtype),
@@ -34,6 +31,7 @@ class VectorArg(Argument):
         return self.name + "_ary"
 
     struct_char = "P"
+
 
 class ScalarArg(Argument):
     def declarator(self):
@@ -47,8 +45,6 @@ class ScalarArg(Argument):
         return self.dtype.char
 
 
-
-
 def get_elwise_module_descriptor(arguments, operation, name="kernel"):
     from codepy.bpl import BoostPythonModule
 
@@ -56,7 +52,7 @@ def get_elwise_module_descriptor(arguments, operation, name="kernel"):
             Value, POD, Struct, For, Initializer, Include, Statement, \
             Line, Block
 
-    S = Statement
+    S = Statement  # noqa: N806
 
     mod = BoostPythonModule()
     mod.add_to_preamble([
@@ -76,9 +72,10 @@ def get_elwise_module_descriptor(arguments, operation, name="kernel"):
                 varg.name),
             "args.%s_ary.begin()" % varg.name)
         for varg in arguments if isinstance(varg, VectorArg)]
-        +[Initializer(
-            sarg.declarator(), "args." + sarg.name)
-        for sarg in arguments if isinstance(sarg, ScalarArg)]
+        + [
+            Initializer(
+                sarg.declarator(), "args." + sarg.name)
+            for sarg in arguments if isinstance(sarg, ScalarArg)]
         )
 
     body.extend([
@@ -90,7 +87,7 @@ def get_elwise_module_descriptor(arguments, operation, name="kernel"):
             )
         ])
 
-    arg_struct = Struct("arg_struct", 
+    arg_struct = Struct("arg_struct",
             [arg.declarator() for arg in arguments])
     mod.add_struct(arg_struct, "ArgStruct")
     mod.add_to_module([Line()])
@@ -104,7 +101,6 @@ def get_elwise_module_descriptor(arguments, operation, name="kernel"):
                 body))
 
     return mod
-
 
 
 def get_elwise_module_binary(arguments, operation, name="kernel", toolchain=None):
@@ -122,13 +118,9 @@ def get_elwise_module_binary(arguments, operation, name="kernel", toolchain=None
             .compile(toolchain)
 
 
-
-
 def get_elwise_kernel(arguments, operation, name="kernel", toolchain=None):
     return getattr(get_elwise_module_binary(
         arguments, operation, name, toolchain), name)
-
-
 
 
 class ElementwiseKernel:
@@ -142,11 +134,10 @@ class ElementwiseKernel:
                 if isinstance(arg, VectorArg)]
 
         assert self.vec_arg_indices, \
-                "ElementwiseKernel can only be used with functions that have at least one " \
-                "vector argument"
+                "ElementwiseKernel can only be used with functions " \
+                "that have at least one vector argument"
 
     def __call__(self, *args):
-        vectors = []
         args = list(args)
 
         from pytools import single_valued
@@ -166,21 +157,17 @@ class ElementwiseKernel:
         self.func(size, arg_struct)
 
 
-
-
 @memoize
 def make_linear_comb_kernel_with_result_dtype(
         result_dtype, scalar_dtypes, vector_dtypes):
     comp_count = len(vector_dtypes)
     from pytools import flatten
     return ElementwiseKernel([VectorArg(result_dtype, "result")] + list(flatten(
-            (ScalarArg(scalar_dtypes[i], "a%d_fac" % i), 
+            (ScalarArg(scalar_dtypes[i], "a%d_fac" % i),
                 VectorArg(vector_dtypes[i], "a%d" % i))
             for i in range(comp_count))),
-            "result[i] = " + " + ".join("a%d_fac*a%d[i]" % (i, i) 
+            "result[i] = " + " + ".join("a%d_fac*a%d[i]" % (i, i)
                 for i in range(comp_count)))
-
-
 
 
 @memoize
@@ -193,7 +180,7 @@ def make_linear_comb_kernel(scalar_dtypes, vector_dtypes):
 
 
 if __name__ == "__main__":
-    import pyublas
+    import pyublas  # noqa: F401
 
     a = numpy.random.rand(50000)
     b = numpy.random.rand(50000)

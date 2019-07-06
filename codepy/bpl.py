@@ -3,8 +3,6 @@
 from __future__ import absolute_import
 
 
-
-
 class BoostPythonModule(object):
     def __init__(self, name="module", max_arity=None,
             use_private_namespace=True):
@@ -112,7 +110,8 @@ class BoostPythonModule(object):
             py_f_name = py_member_name_transform(f.name)
             tp_lines, declarator = f.get_decl_pair()
             if f.name in by_value_members or tp_lines[0].startswith("numpy_"):
-                member_defs.append(".def(pyublas::by_value_rw_member(\"%s\", &cl::%s))"
+                member_defs.append(
+                        ".def(pyublas::by_value_rw_member(\"%s\", &cl::%s))"
                         % (py_f_name, f.name))
             else:
                 member_defs.append(".def_readwrite(\"%s\", &cl::%s)"
@@ -167,4 +166,3 @@ class BoostPythonModule(object):
         from codepy.jit import extension_from_string
         return extension_from_string(toolchain, self.name,
                 str(self.generate())+"\n", **kwargs)
-
