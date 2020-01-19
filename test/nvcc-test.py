@@ -56,7 +56,7 @@ host_mod.add_to_preamble([c.Include('boost/python/extract.hpp')])
 cuda_mod = CudaModule(host_mod)
 cuda_mod.add_to_preamble([c.Include('cuda.h')])
 
-globalIndex = 'int index = blockIdx.x * blockDim.x + threadIdx.x'
+global_index = 'int index = blockIdx.x * blockDim.x + threadIdx.x'
 compute_diff = 'outputPtr[index] = inputPtr[index] - inputPtr[index-1]'
 launch = ['CUdeviceptr output',
           'cuMemAlloc(&output, sizeof(T) * length)',
@@ -71,7 +71,7 @@ diff = [
                 [c.Value('T*', 'inputPtr'),
                  c.Value('int', 'length'),
                  c.Value('T*', 'outputPtr')]))),
-    c.Block([c.Statement(globalIndex),
+    c.Block([c.Statement(global_index),
            c.If('index == 0',
               c.Statement('outputPtr[0] = inputPtr[0]'),
               c.If('index < length',
@@ -110,17 +110,17 @@ import pycuda.driver
 import pycuda.gpuarray
 import numpy as np
 length = 25
-constantValue = 2
+constant_value = 2
 # This is a strange way to create a GPUArray, but is meant to illustrate
 # how to construct a GPUArray if the GPU buffer it owns has been
 # created by something else
 
 pointer = pycuda.driver.mem_alloc(length * 4)
-pycuda.driver.memset_d32(pointer, constantValue, length)
+pycuda.driver.memset_d32(pointer, constant_value, length)
 a = pycuda.gpuarray.GPUArray((length,), np.int32, gpudata=pointer)
 b = module.adjacentDifference(a).get()
 
-golden = [constantValue] + [0] * (length - 1)
+golden = [constant_value] + [0] * (length - 1)
 difference = [(x-y)*(x-y) for x, y in zip(b, golden)]
 error = sum(difference)
 if error == 0:
