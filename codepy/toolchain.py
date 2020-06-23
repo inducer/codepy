@@ -272,8 +272,8 @@ class GCCToolchain(GCCLikeToolchain):
         return Toolchain.abi_id(self) + [self._cmdline([])]
 
     def with_optimization_level(self, level, debug=False, **extra):
-        def remove_prefix(line, prefix):
-            return [f for f in line if not f.startswith(prefix)]
+        def remove_prefix(flags, prefix):
+            return [f for f in flags if not f.startswith(prefix)]
 
         cflags = self.cflags
         for pfx in ["-O", "-g", "-march", "-mtune", "-DNDEBUG"]:
