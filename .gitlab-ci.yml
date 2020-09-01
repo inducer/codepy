@@ -6,3 +6,25 @@ Flake8:
   - python3
   except:
   - tags
+
+Python 3:
+  script:
+  - py_version=3
+  - export EXTRA_INSTALL="numpy"
+  - curl -L -O -k https://gitlab.tiker.net/inducer/ci-support/raw/master/build-and-test-py-project.sh
+  - ". ./build-and-test-py-project.sh"
+  tags:
+  - python3
+  except:
+  - tags
+  artifacts:
+    reports:
+      junit: test/pytest.xml
+
+Documentation:
+  script:
+  - EXTRA_INSTALL="numpy"
+  - curl -L -O -k https://gitlab.tiker.net/inducer/ci-support/raw/master/build-docs.sh
+  - ". ./build-docs.sh"
+  tags:
+  - python3

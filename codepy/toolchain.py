@@ -91,7 +91,7 @@ class Toolchain(Record):
 
     def build_extension(self, ext_file, source_files, debug=False):
         """Create the extension file *ext_file* from *source_files*
-        by invoking the toolchain. Raise :exc:`CompileError` in
+        by invoking the toolchain. Raise :exc:`~codepy.jit.CompileError` in
         case of error.
 
         If *debug* is True, print the commands executed.

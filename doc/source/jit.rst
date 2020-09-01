@@ -38,6 +38,9 @@ Errors
     :members: copy, get_version, abi_id, add_library, build_extension
     :undoc-members:
 
+.. autoclass:: GCCLikeToolchain
+    :show-inheritance:
+
 .. autoclass:: GCCToolchain
     :show-inheritance:
 
