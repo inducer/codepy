@@ -49,8 +49,8 @@ copyright = u'2009, Andreas Kloeckner'
 # The short X.Y version.
 import re
 ver_re = re.compile(r'version\s*=\s*"([0-9a-z.]+)"')
-version = [ver_re.search(line).group(1) 
-        for line in open("../../setup.py").readlines() 
+version = [ver_re.search(line).group(1)
+        for line in open("../../setup.py").readlines()
         if ver_re.search(line)][0]
 # The full version, including alpha/beta/rc tags.
 release = version
@@ -135,7 +135,7 @@ html_sidebars = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+#html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -188,8 +188,8 @@ htmlhelp_basename = 'codepydoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, document class [howto/manual]).
 latex_documents = [
-  ('index', 'codepy.tex', ur'codepy Documentation',
-   ur'Andreas Kloeckner', 'manual'),
+  ('index', 'codepy.tex', r'codepy Documentation',
+   r'Andreas Kloeckner', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

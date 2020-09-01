@@ -44,7 +44,7 @@ the string "hello world"::
 Boost.Python and CodePy
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-You may notice that the above code snippet refers to 
+You may notice that the above code snippet refers to
 `Boost.Python <http://www.boost.org/doc/libs/release/libs/python/doc/>`_.
 Boost.Python is a Python wrapper generator library for C++.
 CodePy does not depend on it being available, but its use
@@ -61,7 +61,7 @@ in :file:`$HOME/.aksetup-defaults.py` and :file:`/etc/aksetup-defaults.py`.
 
 .. note::
 
-  Boost.Python is not needed at all if CodePy is used to generate code 
+  Boost.Python is not needed at all if CodePy is used to generate code
   for PyCuda.
 
 Contents
@@ -73,7 +73,7 @@ Contents
     jit
     faq
 
-If you are looking for the :mod:`codepy.cgen` module, it has been moved to a
+If you are looking for the ``codepy.cgen`` module, it has been moved to a
 separate package called :mod:`cgen`, see also that package's `package index
 page <http://pypi.python.org/pypi/cgen>`_.
 
