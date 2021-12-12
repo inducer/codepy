@@ -34,8 +34,8 @@ class Toolchain(Record):
     """Abstract base class for tools used to link dynamic Python modules."""
 
     def __init__(self, *args, **kwargs):
-        if 'features' not in kwargs:
-            kwargs['features'] = set()
+        if "features" not in kwargs:
+            kwargs["features"] = set()
         Record.__init__(self, *args, **kwargs)
 
     def get_version(self):
@@ -250,7 +250,7 @@ class GCCToolchain(GCCLikeToolchain):
 
     def _cmdline(self, files, object=False):
         if object:
-            ld_options = ['-c']
+            ld_options = ["-c"]
             link = []
         else:
             ld_options = self.ldflags
@@ -298,7 +298,7 @@ class NVCCToolchain(GCCLikeToolchain):
         ver = self.get_version()
         lines = ver.split("\n")
         words = lines[3].split()
-        numbers = words[4].split('.') + words[5].split('.')
+        numbers = words[4].split(".") + words[5].split(".")
 
         result = []
         for n in numbers:
@@ -312,7 +312,7 @@ class NVCCToolchain(GCCLikeToolchain):
 
     def _cmdline(self, files, object=False):
         if object:
-            ldflags = ['-c']
+            ldflags = ["-c"]
             load = []
         else:
             ldflags = self.ldflags
@@ -379,10 +379,10 @@ def _guess_toolchain_kwargs_from_python_config():
             + make_vars["CFLAGS"].split()
             + make_vars["CFLAGSFORSHARED"].split())
     object_names = [
-            oname for oname in make_vars['OBJECT_OBJS'].split()
+            oname for oname in make_vars["OBJECT_OBJS"].split()
             if "(" not in oname and ")" not in oname]
 
-    object_suffix = '.' + object_names[0].split('.')[1]
+    object_suffix = "." + object_names[0].split(".")[1]
 
     cflags = []
     defines = []
@@ -417,7 +417,7 @@ def _guess_toolchain_kwargs_from_python_config():
                 make_vars["INCLUDEPY"]
                 ],
             library_dirs=[make_vars["LIBDIR"]],
-            so_ext=make_vars["SO"] if 'SO' in make_vars else '.so',
+            so_ext=make_vars["SO"] if "SO" in make_vars else ".so",
             o_ext=object_suffix,
             defines=defines,
             undefines=undefines,
@@ -453,7 +453,7 @@ def guess_toolchain():
             # And update the cflags accordingly
             import sys
             if sys.maxsize == 0x7fffffff:
-                kwargs["cflags"].extend(['-arch', 'i386'])
+                kwargs["cflags"].extend(["-arch", "i386"])
 
         return GCCToolchain(**kwargs)
     elif "Apple LLVM" in version and "clang" in version:
@@ -466,7 +466,7 @@ def guess_toolchain():
             # And update the cflags accordingly
             import sys
             if sys.maxsize == 0x7fffffff:
-                kwargs["cflags"].extend(['-arch', 'i386'])
+                kwargs["cflags"].extend(["-arch", "i386"])
 
         return GCCToolchain(**kwargs)
     else:

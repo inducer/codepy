@@ -217,7 +217,7 @@ class _SourceInfo(Record):
 
 
 def compile_from_string(toolchain, name, source_string,
-                        source_name=["module.cpp"], cache_dir=None,
+                        source_name=None, cache_dir=None,
                         debug=False, wait_on_error=None, debug_recompile=True,
                         object=False, source_is_binary=False, sleep_delay=1):
     """Returns a tuple: mod_name, file_name, recompiled.
@@ -256,6 +256,8 @@ def compile_from_string(toolchain, name, source_string,
     If *source_is_binary*, the source string is a compile object file and
     should be treated as binary for read/write purposes
     """
+    if source_name is None:
+        source_name = ["module.cpp"]
 
     # first ensure that source strings and names are lists
     if isinstance(source_string, str) \
@@ -331,15 +333,15 @@ def compile_from_string(toolchain, name, source_string,
             if source_is_binary:
                 checksum.update(source)
             else:
-                checksum.update(source.encode('utf-8'))
-        checksum.update(str(toolchain.abi_id()).encode('utf-8'))
+                checksum.update(source.encode("utf-8"))
+        checksum.update(str(toolchain.abi_id()).encode("utf-8"))
         return checksum.hexdigest()
 
     def load_info(info_path):
         from six.moves.cPickle import load
 
         try:
-            info_file = open(info_path, 'rb')
+            info_file = open(info_path, "rb")
         except OSError:
             raise _InvalidInfoFile()
 

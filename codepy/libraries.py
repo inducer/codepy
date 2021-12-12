@@ -1,11 +1,9 @@
 """Configure JIT platforms to link with external libraries."""
 
-
 __copyright__ = "Copyright (C) 2008 Andreas Kloeckner"
 
 
 from pytools import memoize
-import six
 
 
 def search_on_path(filenames):
@@ -66,7 +64,7 @@ def get_aksetup_config():
 
             with open(fname) as cf_file:
                 file_contents = cf_file.read()
-            exec(compile(file_contents, fname, 'exec'), filevars)
+            exec(compile(file_contents, fname, "exec"), filevars)
 
             for key, value in filevars.items():
                 if key != "__builtins__":
@@ -151,9 +149,9 @@ def add_hedge(toolchain):
 
 def add_cuda(toolchain):
     conf = get_aksetup_config()
-    cuda_lib_path = conf.get('CUDADRV_LIB_DIR', [])
-    cuda_library = conf.get('CUDADRV_LIBNAME', ['cuda'])
-    cuda_include_path = conf.get('CUDA_INC_DIR', [])
+    cuda_lib_path = conf.get("CUDADRV_LIB_DIR", [])
+    cuda_library = conf.get("CUDADRV_LIBNAME", ["cuda"])
+    cuda_include_path = conf.get("CUDA_INC_DIR", [])
 
     if not cuda_include_path or not cuda_lib_path:
         from os.path import dirname, join, normpath
@@ -174,10 +172,10 @@ def add_cuda(toolchain):
         if not cuda_lib_path:
             cuda_lib_path = [join(cuda_root, "lib"), join(cuda_root, "lib64")]
 
-    cuda_rt_path = conf.get('CUDART_LIB_DIR', cuda_lib_path)
-    cuda_rt_library = conf.get('CUDART_LIBNAME', ['cudart'])
+    cuda_rt_path = conf.get("CUDART_LIB_DIR", cuda_lib_path)
+    cuda_rt_library = conf.get("CUDART_LIBNAME", ["cudart"])
 
-    toolchain.add_library('cuda', cuda_include_path,
+    toolchain.add_library("cuda", cuda_include_path,
                           cuda_lib_path + cuda_rt_path,
                           cuda_library + cuda_rt_library)
 
