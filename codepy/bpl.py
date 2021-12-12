@@ -65,8 +65,8 @@ class BoostPythonModule:
                 Typedef(Value(name, "cl")),
                 Line(),
                 Statement(
-                    'boost::python::class_<cl>("%s")'
-                    ".def(codepy::no_compare_indexing_suite<cl>())" % py_name),
+                    f'boost::python::class_<cl>("{py_name}")'
+                    ".def(codepy::no_compare_indexing_suite<cl>())"),
                 ]))
 
     def add_function(self, func):
@@ -88,7 +88,7 @@ class BoostPythonModule:
         self.mod_body.append(func)
         from cgen import Statement
         self.add_raw_function_include()
-        raw_function = "boost::python::raw_function(&%s)" % func.fdecl.name
+        raw_function = f"boost::python::raw_function(&{func.fdecl.name})"
         self.init_body.append(
             Statement(
                 'boost::python::def("{}", {})'.format(
@@ -113,11 +113,12 @@ class BoostPythonModule:
             tp_lines, declarator = f.get_decl_pair()
             if f.name in by_value_members or tp_lines[0].startswith("numpy_"):
                 member_defs.append(
-                        '.def(pyublas::by_value_rw_member("%s", &cl::%s))'
-                        % (py_f_name, f.name))
+                        ".def(pyublas::by_value_rw_member"
+                        f'("{py_f_name}", &cl::{f.name}))')
             else:
-                member_defs.append('.def_readwrite("%s", &cl::%s)'
-                        % (py_f_name, f.name))
+                member_defs.append(
+                        f'.def_readwrite("{py_f_name}", &cl::{f.name})'
+                        )
 
         self.init_body.append(
             Block([
@@ -149,7 +150,7 @@ class BoostPythonModule:
         body += ([Include("boost/python.hpp")]
                 + self.preamble + [Line()]
                 + mod_body
-                + [Line(), Line("BOOST_PYTHON_MODULE(%s)" % self.name)]
+                + [Line(), Line(f"BOOST_PYTHON_MODULE({self.name})")]
                 + [Block(self.init_body)])
 
         return Module(body)
@@ -167,4 +168,4 @@ class BoostPythonModule:
 
         from codepy.jit import extension_from_string
         return extension_from_string(toolchain, self.name,
-                str(self.generate())+"\n", **kwargs)
+                "{}\n".format(self.generate()), **kwargs)

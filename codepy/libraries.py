@@ -87,9 +87,9 @@ def get_aksetup_config():
 
 def get_boost_libname(basename, aksetup):
     try:
-        return aksetup["BOOST_%s_LIBNAME" % basename.upper()]
+        return aksetup[f"BOOST_{basename.upper()}_LIBNAME"]
     except KeyError:
-        return ["boost_%s" % (basename)]
+        return [f"boost_{basename}"]
 
 
 def add_boost_python(toolchain):
@@ -99,10 +99,10 @@ def add_boost_python(toolchain):
             "boost-python",
             aksetup.get("BOOST_INC_DIR", []),
             aksetup.get("BOOST_LIB_DIR", []),
-            get_boost_libname("python-py%d%d" % sys.version_info[:2], aksetup)
-            + ["python%d.%d%s" % (
-                sys.version_info[:2] + (
-                    "m" if sys.version_info[0] >= 3 else "",))]
+            get_boost_libname("python-py{}{}".format(*sys.version_info[:2]), aksetup)
+            + ["python{}.{}{}".format(
+                *sys.version_info[:2],
+                "m" if sys.version_info[0] >= 3 else "")]
             )
 
 
@@ -126,7 +126,7 @@ def add_numpy(toolchain):
 def add_py_module(toolchain, name):
     def get_module_include_path(name):
         from pkg_resources import Requirement, resource_filename
-        return resource_filename(Requirement.parse(name), "%s/include" % name)
+        return resource_filename(Requirement.parse(name), f"{name}/include")
 
     toolchain.add_library(name, [get_module_include_path(name)], [], [])
 
