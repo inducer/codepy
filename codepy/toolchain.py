@@ -146,7 +146,7 @@ class GCCLikeToolchain(Toolchain):
     def get_version(self):
         result, stdout, stderr = call_capture_output([self.cc, "--version"])
         if result != 0:
-            raise RuntimeError("version query failed: "+stderr)
+            raise RuntimeError(f"version query failed: {stderr}")
         return stdout
 
     def enable_debugging(self):
@@ -157,15 +157,15 @@ class GCCLikeToolchain(Toolchain):
         result, stdout, stderr = call_capture_output(
                 [self.cc]
                 + ["-M"]
-                + ["-D%s" % define for define in self.defines]
-                + ["-U%s" % undefine for undefine in self.undefines]
-                + ["-I%s" % idir for idir in self.include_dirs]
+                + [f"-D{define}" for define in self.defines]
+                + [f"-U{undefine}" for undefine in self.undefines]
+                + [f"-I{idir}" for idir in self.include_dirs]
                 + self.cflags
                 + source_files
                 )
 
         if result != 0:
-            raise CompileError("getting dependencies failed: "+stderr)
+            raise CompileError(f"getting dependencies failed: {stderr}")
 
         lines = join_continued_lines(stdout.split("\n"))
         from pytools import flatten
@@ -186,8 +186,8 @@ class GCCLikeToolchain(Toolchain):
 
         if result != 0:
             import sys
-            print("FAILED compiler invocation:"
-                  + " ".join(cc_cmdline), file=sys.stderr)
+            print("FAILED compiler invocation: {}".format(" ".join(cc_cmdline)),
+                  file=sys.stderr)
             raise CompileError("module compilation failed")
 
     def build_extension(self, ext_file, source_files, debug=False):
@@ -204,7 +204,7 @@ class GCCLikeToolchain(Toolchain):
 
         if result != 0:
             import sys
-            print("FAILED compiler invocation:" + " ".join(cc_cmdline),
+            print("FAILED compiler invocation: {}".format(" ".join(cc_cmdline)),
                   file=sys.stderr)
             raise CompileError("module compilation failed")
 
@@ -222,7 +222,7 @@ class GCCLikeToolchain(Toolchain):
 
         if result != 0:
             import sys
-            print("FAILED compiler invocation:" + " ".join(cc_cmdline),
+            print("FAILED compiler invocation: {}".format(" ".join(cc_cmdline)),
                   file=sys.stderr)
             raise CompileError("module compilation failed")
 
@@ -254,15 +254,15 @@ class GCCToolchain(GCCLikeToolchain):
             link = []
         else:
             ld_options = self.ldflags
-            link = ["-L%s" % ldir for ldir in self.library_dirs]
-            link.extend(["-l%s" % lib for lib in self.libraries])
+            link = [f"-L{ldir}" for ldir in self.library_dirs]
+            link.extend([f"-l{lib}" for lib in self.libraries])
         return (
             [self.cc]
             + self.cflags
             + ld_options
-            + ["-D%s" % define for define in self.defines]
-            + ["-U%s" % undefine for undefine in self.undefines]
-            + ["-I%s" % idir for idir in self.include_dirs]
+            + [f"-D{define}" for define in self.defines]
+            + [f"-U{undefine}" for undefine in self.undefines]
+            + [f"-I{idir}" for idir in self.include_dirs]
             + files
             + link
             )
@@ -281,7 +281,7 @@ class GCCToolchain(GCCLikeToolchain):
         if level == "debug":
             oflags = ["-g"]
         else:
-            oflags = ["-O%d" % level, "-DNDEBUG"]
+            oflags = [f"-O{level}", "-DNDEBUG"]
 
             if level >= 2 and self.get_version_tuple() >= (4, 3):
                 oflags.extend(["-march=native", "-mtune=native", ])
@@ -316,15 +316,15 @@ class NVCCToolchain(GCCLikeToolchain):
             load = []
         else:
             ldflags = self.ldflags
-            load = ["-L%s" % ldir for ldir in self.library_dirs]
-            load.extend(["-l%s" % lib for lib in self.libraries])
+            load = [f"-L{ldir}" for ldir in self.library_dirs]
+            load.extend([f"-l{lib}" for lib in self.libraries])
         return (
                 [self.cc]
                 + self.cflags
                 + ldflags
-                + ["-D%s" % define for define in self.defines]
-                + ["-U%s" % undefine for undefine in self.undefines]
-                + ["-I%s" % idir for idir in self.include_dirs]
+                + [f"-D{define}" for define in self.defines]
+                + [f"-U{undefine}" for undefine in self.undefines]
+                + [f"-I{idir}" for idir in self.include_dirs]
                 + files
                 + load
                 )
@@ -352,7 +352,7 @@ class NVCCToolchain(GCCLikeToolchain):
 
         if result != 0:
             import sys
-            print("FAILED compiler invocation:" + " ".join(cc_cmdline),
+            print("FAILED compiler invocation: {}".format(" ".join(cc_cmdline)),
                   file=sys.stderr)
             raise CompileError("module compilation failed")
 
@@ -382,7 +382,7 @@ def _guess_toolchain_kwargs_from_python_config():
             oname for oname in make_vars["OBJECT_OBJS"].split()
             if "(" not in oname and ")" not in oname]
 
-    object_suffix = "." + object_names[0].split(".")[1]
+    object_suffix = ".{}".format(object_names[0].split(".")[1])
 
     cflags = []
     defines = []
@@ -441,7 +441,7 @@ def guess_toolchain():
     kwargs = _guess_toolchain_kwargs_from_python_config()
     result, version, stderr = call_capture_output([kwargs["cc"], "--version"])
     if result != 0:
-        raise ToolchainGuessError("compiler version query failed: "+stderr)
+        raise ToolchainGuessError(f"compiler version query failed: {stderr}")
 
     if "Free Software Foundation" in version:
         if "-Wstrict-prototypes" in kwargs["cflags"]:

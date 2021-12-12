@@ -125,8 +125,8 @@ class CacheLockManager(CleanupBase):
 
                 if attempts > 10:
                     from warnings import warn
-                    warn("could not obtain lock--delete '%s' if necessary"
-                            % self.lock_file)
+                    warn("could not obtain lock -- "
+                            f"delete '{self.lock_file}' if necessary")
 
             cleanup_m.register(self)
 
@@ -357,14 +357,16 @@ def compile_from_string(toolchain, name, source_string,
                 possibly_updated = os.stat(name).st_mtime != date
             except OSError as e:
                 if debug_recompile:
-                    logger.info("recompiling because dependency %s is "
-                    "inaccessible (%s)." % (name, e))
+                    logger.info(
+                            "recompiling because dependency %s is "
+                            "inaccessible (%s).", name, e)
                 return False
             else:
                 if possibly_updated and md5sum != get_file_md5sum(name):
                     if debug_recompile:
-                        logger.info("recompiling because dependency %s was "
-                        "updated." % name)
+                        logger.info(
+                                "recompiling because dependency %s was "
+                                "updated.", name)
                     return False
 
         return True
@@ -377,8 +379,9 @@ def compile_from_string(toolchain, name, source_string,
                 src_f = open(path, "r" if not source_is_binary else "rb")
             except OSError:
                 if debug_recompile:
-                    logger.info("recompiling because cache directory does "
-                            "not contain source file '%s'." % path)
+                    logger.info(
+                            "recompiling because cache directory does "
+                            "not contain source file '%s'.", path)
                 return False
 
             valid = valid and src_f.read() == source
@@ -406,7 +409,7 @@ def compile_from_string(toolchain, name, source_string,
         mod_cache_dir_m = ModuleCacheDirManager(cleanup_m,
                 os.path.join(cache_dir, hex_checksum))
         info_path = mod_cache_dir_m.sub("info")
-        ext_file = mod_cache_dir_m.sub(name+suffix)
+        ext_file = mod_cache_dir_m.sub(name + suffix)
 
         if mod_cache_dir_m.existed:
             try:
@@ -415,16 +418,16 @@ def compile_from_string(toolchain, name, source_string,
                 mod_cache_dir_m.reset()
 
                 if debug_recompile:
-                    logger.info("recompiling for invalid cache dir (%s)." % (
-                            mod_cache_dir_m.path))
+                    logger.info("recompiling for invalid cache dir (%s).",
+                            mod_cache_dir_m.path)
             else:
                 if check_deps(info.dependencies) and check_source(
                         [mod_cache_dir_m.sub(x) for x in info.source_name]):
                     return hex_checksum, mod_name, ext_file, False
         else:
             if debug_recompile:
-                logger.info("recompiling for non-existent cache dir (%s)." % (
-                        mod_cache_dir_m.path))
+                logger.info("recompiling for non-existent cache dir (%s).",
+                        mod_cache_dir_m.path)
 
         source_paths = [mod_cache_dir_m.sub(source) for source in source_name]
 

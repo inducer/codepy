@@ -8,7 +8,7 @@ class CudaModule:
         which calls CUDA code.
         Current limitations of nvcc preclude compiling anything which
         references Boost by nvcc, so the code needs to be split in two pieces:
-        a BoostPythonModule compiled by the host c++ compiler, as well as CUDA
+        a BoostPythonModule compiled by the host C++ compiler, as well as CUDA
         code which is compiled by nvcc.  This module allows the construction of
         CUDA code to be compiled by nvcc, as well as bridges between the CUDA
         code and the BoostPythonModule.
@@ -43,8 +43,7 @@ class CudaModule:
         module line-by-line.
         """
         body = []
-        body += (self.preamble + [cgen.Line()]
-                + self.body)
+        body += (self.preamble + [cgen.Line()] + self.body)
         return cgen.Module(body)
 
     def compile(self, host_toolchain, nvcc_toolchain,
@@ -68,8 +67,8 @@ class CudaModule:
         nvcc_toolchain = nvcc_toolchain.copy()
         add_cuda(nvcc_toolchain)
 
-        host_code = str(self.boost_module.generate()) + "\n"
-        device_code = str(self.generate()) + "\n"
+        host_code = "{}\n".format(self.boost_module.generate())
+        device_code = "{}\n".format(self.generate())
 
         from codepy.jit import compile_from_string
         from codepy.jit import link_extension

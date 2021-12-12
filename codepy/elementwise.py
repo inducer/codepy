@@ -23,11 +23,12 @@ class Argument:
 
 class VectorArg(Argument):
     def declarator(self):
-        return Value("numpy_array<%s >" % dtype_to_ctype(self.dtype),
-                self.name+"_ary")
+        return Value(
+                "numpy_array<{} >".format(dtype_to_ctype(self.dtype)),
+                f"{self.name}_ary")
 
     def arg_name(self):
-        return self.name + "_ary"
+        return f"{self.name}_ary"
 
     struct_char = "P"
 
@@ -66,14 +67,14 @@ def get_elwise_module_descriptor(arguments, operation, name="kernel"):
 
     body = Block([
         Initializer(
-            Value("numpy_array<%s >::iterator"
-                % dtype_to_ctype(varg.dtype),
+            Value(
+                "numpy_array<{} >::iterator".format(dtype_to_ctype(varg.dtype)),
                 varg.name),
-            "args.%s_ary.begin()" % varg.name)
+            f"args.{varg.name}_ary.begin()")
         for varg in arguments if isinstance(varg, VectorArg)]
         + [
             Initializer(
-                sarg.declarator(), "args." + sarg.name)
+                sarg.declarator(), f"args.{sarg.name}")
             for sarg in arguments if isinstance(sarg, ScalarArg)]
         )
 
@@ -162,17 +163,18 @@ def make_linear_comb_kernel_with_result_dtype(
     comp_count = len(vector_dtypes)
     from pytools import flatten
     return ElementwiseKernel([VectorArg(result_dtype, "result")] + list(flatten(
-            (ScalarArg(scalar_dtypes[i], "a%d_fac" % i),
-                VectorArg(vector_dtypes[i], "a%d" % i))
+            (ScalarArg(scalar_dtypes[i], f"a{i}_fac"),
+                VectorArg(vector_dtypes[i], f"a{i}"))
             for i in range(comp_count))),
-            "result[i] = " + " + ".join("a%d_fac*a%d[i]" % (i, i)
-                for i in range(comp_count)))
+            "result[i] = " + " + ".join(
+                f"a{i}_fac*a{i}[i]" for i in range(comp_count)
+                ))
 
 
 @memoize
 def make_linear_comb_kernel(scalar_dtypes, vector_dtypes):
     from pytools import common_dtype
-    result_dtype = common_dtype(scalar_dtypes+vector_dtypes)
+    result_dtype = common_dtype(scalar_dtypes + vector_dtypes)
 
     return make_linear_comb_kernel_with_result_dtype(
             result_dtype, scalar_dtypes, vector_dtypes), result_dtype
