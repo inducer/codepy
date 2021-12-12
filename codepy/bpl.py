@@ -1,9 +1,8 @@
 """Convenience interface for using CodePy with Boost.Python."""
 
-from __future__ import absolute_import
 
 
-class BoostPythonModule(object):
+class BoostPythonModule:
     def __init__(self, name="module", max_arity=None,
             use_private_namespace=True):
         self.name = name
@@ -80,7 +79,7 @@ class BoostPythonModule(object):
         from cgen import Statement
         self.init_body.append(
                 Statement(
-                    "boost::python::def(\"%s\", &%s)" % (
+                    "boost::python::def(\"{}\", &{})".format(
                         func.fdecl.name, func.fdecl.name)))
 
     def add_raw_function(self, func):
@@ -93,7 +92,7 @@ class BoostPythonModule(object):
         raw_function = "boost::python::raw_function(&%s)" % func.fdecl.name
         self.init_body.append(
             Statement(
-                "boost::python::def(\"%s\", %s)" % (
+                "boost::python::def(\"{}\", {})".format(
                     func.fdecl.name, raw_function)))
 
     def add_struct(self, struct, py_name=None, py_member_name_transform=lambda x: x,
@@ -122,7 +121,7 @@ class BoostPythonModule(object):
                 Typedef(Value(struct.tpname, "cl")),
                 Line(),
                 Statement(
-                    "boost::python::class_<cl>(\"%s\")%s" % (
+                    "boost::python::class_<cl>(\"{}\"){}".format(
                         py_name, "".join(member_defs))),
                 ]))
 

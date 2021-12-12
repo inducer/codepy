@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from setuptools import setup
 
 setup(name="codepy",
       version="2019.1",
       description="Generate and execute native code at run time.",
-      long_description=open("README.rst", "rt").read(),
+      long_description=open("README.rst").read(),
       classifiers=[
           'Development Status :: 4 - Beta',
           'Intended Audience :: Developers',
@@ -20,7 +19,7 @@ setup(name="codepy",
           'Topic :: Utilities',
           ],
 
-      author=u"Andreas Kloeckner",
+      author="Andreas Kloeckner",
       url="http://mathema.tician.de/software/codepy",
       author_email="inform@tiker.net",
       license="MIT",

@@ -1,6 +1,5 @@
 """Toolchains for Just-in-time Python extension compilation."""
 
-from __future__ import division, print_function
 
 __copyright__ = """
 "Copyright (C) 2008,9 Andreas Kloeckner, Bryan Catanzaro

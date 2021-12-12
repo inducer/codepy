@@ -2,7 +2,7 @@ import cgen
 """Convenience interface for using CodePy with CUDA"""
 
 
-class CudaModule(object):
+class CudaModule:
     def __init__(self, boost_module, name="module"):
         """*boost_module* is a codepy.BoostPythonModule containing host code
         which calls CUDA code.
@@ -87,7 +87,7 @@ class CudaModule(object):
         # The name of the shared lib depends on the hex checksums of both
         # host and device code to prevent accidentially returned a cached
         # module with wrong linkage
-        mod_name = "codepy.temp.%s.%s.module" % (host_checksum, device_checksum)
+        mod_name = f"codepy.temp.{host_checksum}.{device_checksum}.module"
 
         if host_compiled or device_compiled:
             return link_extension(host_toolchain,
