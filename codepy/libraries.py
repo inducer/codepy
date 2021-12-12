@@ -1,6 +1,5 @@
 """Configure JIT platforms to link with external libraries."""
 
-from __future__ import division
 
 __copyright__ = "Copyright (C) 2008 Andreas Kloeckner"
 
@@ -44,7 +43,7 @@ def expand_str(s, options):
 
 
 def expand_value(v, options):
-    if isinstance(v, (str, six.text_type)):
+    if isinstance(v, (str, str)):
         return expand_str(v, options)
     elif isinstance(v, list):
         return [expand_value(i, options) for i in v]
@@ -65,11 +64,11 @@ def get_aksetup_config():
         if os.access(fname, os.R_OK):
             filevars = {}
 
-            with open(fname, "r") as cf_file:
+            with open(fname) as cf_file:
                 file_contents = cf_file.read()
             exec(compile(file_contents, fname, 'exec'), filevars)
 
-            for key, value in six.iteritems(filevars):
+            for key, value in filevars.items():
                 if key != "__builtins__":
                     config[key] = value
 

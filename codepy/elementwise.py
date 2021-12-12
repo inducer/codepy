@@ -1,6 +1,5 @@
 """Elementwise functionality."""
 
-from __future__ import division
 
 __copyright__ = "Copyright (C) 2009 Andreas Kloeckner"
 
@@ -16,7 +15,7 @@ class Argument:
         self.name = name
 
     def __repr__(self):
-        return "%s(%r, %s)" % (
+        return "{}({!r}, {})".format(
                 self.__class__.__name__,
                 self.name,
                 self.dtype)

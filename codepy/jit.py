@@ -1,6 +1,5 @@
 """Just-in-time Python extension compilation."""
 
-from __future__ import division
 
 __copyright__ = """
 Copyright (C) 2009-17 Andreas Kloeckner
@@ -67,7 +66,7 @@ def extension_file_from_string(toolchain, ext_file, source_string,
         _erase_dir(src_dir)
 
 
-class CleanupBase(object):
+class CleanupBase:
     pass
 
 
@@ -259,8 +258,8 @@ def compile_from_string(toolchain, name, source_string,
     """
 
     # first ensure that source strings and names are lists
-    if isinstance(source_string, six.string_types) \
-            or (source_is_binary and isinstance(source_string, six.binary_type)):
+    if isinstance(source_string, str) \
+            or (source_is_binary and isinstance(source_string, bytes)):
         source_string = [source_string]
 
     if isinstance(source_name, str):
@@ -282,8 +281,8 @@ def compile_from_string(toolchain, name, source_string,
         import sys
         cache_dir = os.path.join(
                 appdirs.user_cache_dir("codepy", "codepy"),
-                "codepy-compiler-cache-v5-py%s" % (
-                    ".".join(str(i) for i in sys.version_info),))
+                "codepy-compiler-cache-v5-py{}".format(
+                    ".".join(str(i) for i in sys.version_info)))
 
         try:
             os.makedirs(cache_dir)
@@ -341,7 +340,7 @@ def compile_from_string(toolchain, name, source_string,
 
         try:
             info_file = open(info_path, 'rb')
-        except IOError:
+        except OSError:
             raise _InvalidInfoFile()
 
         try:
@@ -375,7 +374,7 @@ def compile_from_string(toolchain, name, source_string,
             source = source_string[i]
             try:
                 src_f = open(path, "r" if not source_is_binary else "rb")
-            except IOError:
+            except OSError:
                 if debug_recompile:
                     logger.info("recompiling because cache directory does "
                             "not contain source file '%s'." % path)
@@ -397,7 +396,7 @@ def compile_from_string(toolchain, name, source_string,
         lock_m = CacheLockManager(cleanup_m, cache_dir, sleep_delay)  # noqa
 
         hex_checksum = calculate_hex_checksum()
-        mod_name = "codepy.temp.%s.%s" % (hex_checksum, name)
+        mod_name = f"codepy.temp.{hex_checksum}.{name}"
         if object:
             suffix = toolchain.o_ext
         else:
