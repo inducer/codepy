@@ -29,5 +29,5 @@ def test_identical_symbols():
     print(us.greet(), aussie.greet())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_identical_symbols()

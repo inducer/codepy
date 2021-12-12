@@ -18,7 +18,7 @@ class CudaModule:
         self.preamble = []
         self.body = []
         self.boost_module = boost_module
-        self.boost_module.add_to_preamble([cgen.Include('cuda.h')])
+        self.boost_module.add_to_preamble([cgen.Include("cuda.h")])
 
     def add_to_preamble(self, pa):
         self.preamble.extend(pa)
@@ -47,13 +47,18 @@ class CudaModule:
                 + self.body)
         return cgen.Module(body)
 
-    def compile(self, host_toolchain, nvcc_toolchain, host_kwargs={},
-                nvcc_kwargs={}, **kwargs):
+    def compile(self, host_toolchain, nvcc_toolchain,
+            host_kwargs=None, nvcc_kwargs=None, **kwargs):
         """Return the extension module generated from the code described
         by *self*. If necessary, build the code using *toolchain* with
         :func:`codepy.jit.extension_from_string`. Any keyword arguments
         accept by that latter function may be passed in *kwargs*.
         """
+        if host_kwargs is None:
+            host_kwargs = {}
+
+        if nvcc_kwargs is None:
+            nvcc_kwargs = {}
 
         from codepy.libraries import add_boost_python, add_cuda
         host_toolchain = host_toolchain.copy()
@@ -82,7 +87,7 @@ class CudaModule:
                         object=True, **local_host_kwargs)
         device_checksum, device_mod_name, device_object, device_compiled = \
                 compile_from_string(
-                        nvcc_toolchain, 'gpu', device_code, 'gpu.cu',
+                        nvcc_toolchain, "gpu", device_code, "gpu.cu",
                         object=True, **local_nvcc_kwargs)
         # The name of the shared lib depends on the hex checksums of both
         # host and device code to prevent accidentially returned a cached

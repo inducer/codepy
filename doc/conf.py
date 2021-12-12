@@ -5,7 +5,7 @@ _conf_url = \
 with urlopen(_conf_url) as _inf:
     exec(compile(_inf.read(), _conf_url, "exec"), globals())
 
-copyright = '2009-21, Andreas Kloeckner'
+copyright = "2009-21, Andreas Kloeckner"
 
 # The short X.Y version.
 import re
@@ -17,8 +17,7 @@ version = [ver_re.search(line).group(1)
 release = version
 
 intersphinx_mapping = {
-        'http://docs.python.org/dev': None,
-        'http://docs.scipy.org/doc/numpy/': None,
-        #'http://documen.tician.de/codepy': None,
-        'http://documen.tician.de/cgen': None,
+        "http://docs.python.org/dev": None,
+        "http://docs.scipy.org/doc/numpy/": None,
+        "http://documen.tician.de/cgen": None,
         }

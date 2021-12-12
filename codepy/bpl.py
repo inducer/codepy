@@ -1,7 +1,6 @@
 """Convenience interface for using CodePy with Boost.Python."""
 
 
-
 class BoostPythonModule:
     def __init__(self, name="module", max_arity=None,
             use_private_namespace=True):
@@ -66,7 +65,7 @@ class BoostPythonModule:
                 Typedef(Value(name, "cl")),
                 Line(),
                 Statement(
-                    "boost::python::class_<cl>(\"%s\")"
+                    'boost::python::class_<cl>("%s")'
                     ".def(codepy::no_compare_indexing_suite<cl>())" % py_name),
                 ]))
 
@@ -79,7 +78,7 @@ class BoostPythonModule:
         from cgen import Statement
         self.init_body.append(
                 Statement(
-                    "boost::python::def(\"{}\", &{})".format(
+                    'boost::python::def("{}", &{})'.format(
                         func.fdecl.name, func.fdecl.name)))
 
     def add_raw_function(self, func):
@@ -92,11 +91,15 @@ class BoostPythonModule:
         raw_function = "boost::python::raw_function(&%s)" % func.fdecl.name
         self.init_body.append(
             Statement(
-                "boost::python::def(\"{}\", {})".format(
+                'boost::python::def("{}", {})'.format(
                     func.fdecl.name, raw_function)))
 
-    def add_struct(self, struct, py_name=None, py_member_name_transform=lambda x: x,
-            by_value_members=set()):
+    def add_struct(self,
+            struct, py_name=None, py_member_name_transform=lambda x: x,
+            by_value_members=None):
+        if by_value_members is None:
+            by_value_members = set()
+
         from cgen import Block, Line, Statement, Typedef, Value
 
         if py_name is None:
@@ -110,10 +113,10 @@ class BoostPythonModule:
             tp_lines, declarator = f.get_decl_pair()
             if f.name in by_value_members or tp_lines[0].startswith("numpy_"):
                 member_defs.append(
-                        ".def(pyublas::by_value_rw_member(\"%s\", &cl::%s))"
+                        '.def(pyublas::by_value_rw_member("%s", &cl::%s))'
                         % (py_f_name, f.name))
             else:
-                member_defs.append(".def_readwrite(\"%s\", &cl::%s)"
+                member_defs.append('.def_readwrite("%s", &cl::%s)'
                         % (py_f_name, f.name))
 
         self.init_body.append(
@@ -121,7 +124,7 @@ class BoostPythonModule:
                 Typedef(Value(struct.tpname, "cl")),
                 Line(),
                 Statement(
-                    "boost::python::class_<cl>(\"{}\"){}".format(
+                    'boost::python::class_<cl>("{}"){}'.format(
                         py_name, "".join(member_defs))),
                 ]))
 
