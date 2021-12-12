@@ -272,12 +272,15 @@ def compile_from_string(toolchain, name, source_string,
                 DeprecationWarning)
 
     import os
-    from os.path import join
 
     if cache_dir is None:
-        import appdirs
+        try:
+            import platformdirs as appdirs
+        except ImportError:
+            import appdirs
+
         import sys
-        cache_dir = join(
+        cache_dir = os.path.join(
                 appdirs.user_cache_dir("codepy", "codepy"),
                 "codepy-compiler-cache-v5-py%s" % (
                     ".".join(str(i) for i in sys.version_info),))
@@ -401,7 +404,7 @@ def compile_from_string(toolchain, name, source_string,
             suffix = toolchain.so_ext
 
         mod_cache_dir_m = ModuleCacheDirManager(cleanup_m,
-                join(cache_dir, hex_checksum))
+                os.path.join(cache_dir, hex_checksum))
         info_path = mod_cache_dir_m.sub("info")
         ext_file = mod_cache_dir_m.sub(name+suffix)
 
