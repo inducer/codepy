@@ -28,7 +28,6 @@ THE SOFTWARE.
 
 from codepy import CompileError
 from pytools import Record
-import six
 
 import logging
 logger = logging.getLogger(__name__)
@@ -338,7 +337,7 @@ def compile_from_string(toolchain, name, source_string,
         return checksum.hexdigest()
 
     def load_info(info_path):
-        from six.moves.cPickle import load
+        import pickle
 
         try:
             info_file = open(info_path, "rb")
@@ -346,7 +345,7 @@ def compile_from_string(toolchain, name, source_string,
             raise _InvalidInfoFile()
 
         try:
-            return load(info_file)
+            return pickle.load(info_file)
         except EOFError:
             raise _InvalidInfoFile()
         finally:
@@ -437,10 +436,10 @@ def compile_from_string(toolchain, name, source_string,
             toolchain.build_extension(ext_file, source_paths, debug=debug)
 
         if info_path is not None:
-            from six.moves.cPickle import dump
+            import pickle
 
             info_file = open(info_path, "wb")
-            dump(_SourceInfo(
+            pickle.dump(_SourceInfo(
                 dependencies=get_dep_structure(source_paths),
                 source_name=source_name), info_file)
             info_file.close()
@@ -468,7 +467,7 @@ def link_extension(toolchain, objects, mod_name, cache_dir=None,
         toolchain.link_extension(destination, objects, debug=debug)
     except CompileError:
         if wait_on_error:
-            six.moves.input("Link error, examine %s, then press [Enter]" % objects)
+            input(f"Link error, examine {objects}, then press [Enter]")
             raise
 
     # try loading it
