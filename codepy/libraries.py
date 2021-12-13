@@ -41,7 +41,7 @@ def expand_str(s, options):
 
 
 def expand_value(v, options):
-    if isinstance(v, (str, str)):
+    if isinstance(v, str):
         return expand_str(v, options)
     elif isinstance(v, list):
         return [expand_value(i, options) for i in v]
