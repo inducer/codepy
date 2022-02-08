@@ -168,7 +168,7 @@ class GCCLikeToolchain(Toolchain):
             raise CompileError(f"getting dependencies failed: {stderr}")
 
         lines = join_continued_lines(stdout.split("\n"))
-        lines = [line for line in lines if not line.strip() and line.strip()[0]=='#']
+        lines = [line for line in lines if not (line.strip() and line.strip()[0]=="#")]
         from pytools import flatten
         return set(flatten(
             line.split()[2:] for line in lines))
