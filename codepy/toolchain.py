@@ -368,23 +368,16 @@ class ToolchainGuessError(Exception):
 
 
 def _guess_toolchain_kwargs_from_python_config():
-    def strip_prefix(pfx, value):
-        if value.startswith(pfx):
-            return value[len(pfx):]
-        else:
-            return value
+    import os
+    import sysconfig
+    config_vars = sysconfig.get_config_vars()
 
-    from distutils.sysconfig import parse_makefile, get_makefile_filename
-    make_vars = parse_makefile(get_makefile_filename())
-
-    cc_cmdline = (make_vars["CXX"].split()
-            + make_vars["CFLAGS"].split()
-            + make_vars["CFLAGSFORSHARED"].split())
-    object_names = [
-            oname for oname in make_vars["OBJECT_OBJS"].split()
-            if "(" not in oname and ")" not in oname]
-
-    object_suffix = ".{}".format(object_names[0].split(".")[1])
+    cc_cmdline = (
+            config_vars["CXX"].split()
+            + config_vars["CFLAGS"].split()
+            + config_vars["CFLAGSFORSHARED"].split()
+            )
+    object_suffix = os.path.splitext(config_vars["MODOBJS"].split()[0])[-1]
 
     cflags = []
     defines = []
@@ -400,26 +393,22 @@ def _guess_toolchain_kwargs_from_python_config():
 
     # on Mac OS X, "libraries" can also be "frameworks"
     libraries = []
-    for lib in make_vars["LIBS"].split():
+    for lib in config_vars["LIBS"].split():
         if lib.startswith("-l"):
-            libraries.append(strip_prefix("-l", lib))
+            libraries.append(lib[2:])
         else:
             cflags.append(lib)
 
+    ld, *ldflags = config_vars["LDSHARED"].split()
     return dict(
             cc=cc_cmdline[0],
-            ld=make_vars["LDSHARED"].split()[0],
+            ld=ld,
             cflags=cflags,
-            ldflags=(
-                make_vars["LDSHARED"].split()[1:]
-                + make_vars["LINKFORSHARED"].split()
-                ),
+            ldflags=ldflags + config_vars["LINKFORSHARED"].split(),
             libraries=libraries,
-            include_dirs=[
-                make_vars["INCLUDEPY"]
-                ],
-            library_dirs=[make_vars["LIBDIR"]],
-            so_ext=make_vars["SO"] if "SO" in make_vars else ".so",
+            include_dirs=[config_vars["INCLUDEPY"]],
+            library_dirs=[config_vars["LIBDIR"]],
+            so_ext=config_vars.get("EXT_SUFFIX", ".so"),
             o_ext=object_suffix,
             defines=defines,
             undefines=undefines,
