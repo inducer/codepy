@@ -233,7 +233,7 @@ def compile_from_string(toolchain, name, source_string,
     been compiled at some point in the past.  Compiler and Python API versions
     as well as versions of include files are taken into account when examining
     the cache. If *cache_dir* is ``None``, a default location is assumed. If it
-    is ``False``, no caching is perfomed.  Proper locking is performed on the
+    is ``False``, no caching is performed.  Proper locking is performed on the
     cache directory.  Simultaneous use of the cache by multiple processes works
     as expected, but may lead to delays because of locking. By default, a
     process waits for 1 second before reattempting to acquire the *cache_dir*

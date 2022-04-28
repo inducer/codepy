@@ -132,7 +132,7 @@ class Toolchain(Record):
         If a subclass doesn't understand an "extra" argument, it should
         simply ignore it.
 
-        Level may also be "debug" to specifiy a debug build.
+        Level may also be "debug" to specify a debug build.
 
         Implemented by subclasses.
         """
