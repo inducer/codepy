@@ -89,7 +89,7 @@ class CudaModule:
                         nvcc_toolchain, "gpu", device_code, "gpu.cu",
                         object=True, **local_nvcc_kwargs)
         # The name of the shared lib depends on the hex checksums of both
-        # host and device code to prevent accidentially returned a cached
+        # host and device code to prevent accidentally returned a cached
         # module with wrong linkage
         mod_name = f"codepy.temp.{host_checksum}.{device_checksum}.module"
 
