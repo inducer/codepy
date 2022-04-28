@@ -1,5 +1,12 @@
-.. image:: https://badge.fury.io/py/codepy.png
-    :target: http://pypi.python.org/pypi/codepy
+.. image:: https://gitlab.tiker.net/inducer/codepy/badges/main/pipeline.svg
+    :alt: Gitlab Build Status
+    :target: https://gitlab.tiker.net/inducer/codepy/commits/main
+.. image:: https://github.com/inducer/codepy/workflows/CI/badge.svg
+    :alt: Github Build Status
+    :target: https://github.com/inducer/codepy/actions?query=branch%3Amain+workflow%3ACI
+.. image:: https://badge.fury.io/py/codepy.svg
+    :alt: Python Package Index Release Page
+    :target: https://pypi.org/project/codepy/
 
 CodePy is a C/C++ metaprogramming toolkit for Python. It helps you compile
 source code and dynamically load it into the Python interpreter.
