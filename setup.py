@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="codepy",
@@ -23,7 +23,7 @@ setup(
     url="http://mathema.tician.de/software/codepy",
     author_email="inform@tiker.net",
     license="MIT",
-    packages=["codepy", "codepy.cgen"],
+    packages=find_packages(),
     python_requires="~=3.8",
     install_requires=[
         "pytools>=2015.1.2",
