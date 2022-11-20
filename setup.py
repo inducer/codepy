@@ -24,7 +24,7 @@ setup(
     author_email="inform@tiker.net",
     license="MIT",
     packages=["codepy", "codepy.cgen"],
-    python_requires="~=3.6",
+    python_requires="~=3.8",
     install_requires=[
         "pytools>=2015.1.2",
         "numpy>=1.6",
