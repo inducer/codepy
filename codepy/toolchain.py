@@ -400,19 +400,19 @@ def _guess_toolchain_kwargs_from_python_config():
             cflags.append(lib)
 
     ld, *ldflags = config_vars["LDSHARED"].split()
-    return dict(
-            cc=cc_cmdline[0],
-            ld=ld,
-            cflags=cflags,
-            ldflags=ldflags + config_vars["LINKFORSHARED"].split(),
-            libraries=libraries,
-            include_dirs=[config_vars["INCLUDEPY"]],
-            library_dirs=[config_vars["LIBDIR"]],
-            so_ext=config_vars.get("EXT_SUFFIX", ".so"),
-            o_ext=object_suffix,
-            defines=defines,
-            undefines=undefines,
-            )
+    return {
+            "cc": cc_cmdline[0],
+            "ld": ld,
+            "cflags": cflags,
+            "ldflags": ldflags + config_vars["LINKFORSHARED"].split(),
+            "libraries": libraries,
+            "include_dirs": [config_vars["INCLUDEPY"]],
+            "library_dirs": [config_vars["LIBDIR"]],
+            "so_ext": config_vars.get("EXT_SUFFIX", ".so"),
+            "o_ext": object_suffix,
+            "defines": defines,
+            "undefines": undefines,
+            }
 
 
 def call_capture_output(*args):
@@ -456,18 +456,18 @@ def guess_toolchain():
 def guess_nvcc_toolchain():
     gcc_kwargs = _guess_toolchain_kwargs_from_python_config()
 
-    kwargs = dict(
-            cc="nvcc",
-            ldflags=[],
-            libraries=gcc_kwargs["libraries"],
-            cflags=["-Xcompiler", ",".join(gcc_kwargs["cflags"])],
-            include_dirs=gcc_kwargs["include_dirs"],
-            library_dirs=gcc_kwargs["library_dirs"],
-            so_ext=gcc_kwargs["so_ext"],
-            o_ext=gcc_kwargs["o_ext"],
-            defines=gcc_kwargs["defines"],
-            undefines=gcc_kwargs["undefines"],
-            )
+    kwargs = {
+            "cc": "nvcc",
+            "ldflags": [],
+            "libraries": gcc_kwargs["libraries"],
+            "cflags": ["-Xcompiler", ",".join(gcc_kwargs["cflags"])],
+            "include_dirs": gcc_kwargs["include_dirs"],
+            "library_dirs": gcc_kwargs["library_dirs"],
+            "so_ext": gcc_kwargs["so_ext"],
+            "o_ext": gcc_kwargs["o_ext"],
+            "defines": gcc_kwargs["defines"],
+            "undefines": gcc_kwargs["undefines"],
+            }
     kwargs.setdefault("undefines", []).append("__BLOCKS__")
     kwargs["cc"] = "nvcc"
 
