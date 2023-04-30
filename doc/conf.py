@@ -17,7 +17,7 @@ version = [ver_re.search(line).group(1)
 release = version
 
 intersphinx_mapping = {
-        "https://docs.python.org/dev": None,
-        "https://numpy.org/doc/stable": None,
-        "https://documen.tician.de/cgen": None,
+        "python": ("https://docs.python.org/dev", None),
+        "numpy": ("https://numpy.org/doc/stable", None),
+        "cgen": ("https://documen.tician.de/cgen", None),
         }
