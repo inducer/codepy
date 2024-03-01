@@ -10,8 +10,8 @@ def search_on_path(filenames):
     """Find file on system path."""
     # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52224
 
-    from os.path import exists, join, abspath
-    from os import pathsep, environ
+    from os import environ, pathsep
+    from os.path import abspath, exists, join
 
     search_path = environ["PATH"]
 

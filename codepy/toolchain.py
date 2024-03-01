@@ -26,8 +26,9 @@ THE SOFTWARE.
 """
 
 
-from codepy import CompileError
 from pytools import Record
+
+from codepy import CompileError
 
 
 class Toolchain(Record):
@@ -416,8 +417,9 @@ def _guess_toolchain_kwargs_from_python_config():
 
 
 def call_capture_output(*args):
-    from pytools.prefork import call_capture_output
     import sys
+
+    from pytools.prefork import call_capture_output
 
     encoding = sys.getdefaultencoding()
     result, stdout, stderr = call_capture_output(*args)

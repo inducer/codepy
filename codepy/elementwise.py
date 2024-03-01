@@ -4,9 +4,10 @@
 __copyright__ = "Copyright (C) 2009 Andreas Kloeckner"
 
 
-from pytools import memoize
 import numpy
 from cgen import POD, Value, dtype_to_ctype
+
+from pytools import memoize
 
 
 class Argument:
@@ -46,11 +47,11 @@ class ScalarArg(Argument):
 
 
 def get_elwise_module_descriptor(arguments, operation, name="kernel"):
-    from codepy.bpl import BoostPythonModule
+    from cgen import (
+        POD, Block, For, FunctionBody, FunctionDeclaration, Include, Initializer,
+        Line, Statement, Struct, Value)
 
-    from cgen import FunctionBody, FunctionDeclaration, \
-            Value, POD, Struct, For, Initializer, Include, Statement, \
-            Line, Block
+    from codepy.bpl import BoostPythonModule
 
     S = Statement  # noqa: N806
 

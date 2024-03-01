@@ -1,4 +1,6 @@
 import cgen
+
+
 """Convenience interface for using CodePy with CUDA"""
 
 
@@ -70,8 +72,7 @@ class CudaModule:
         host_code = "{}\n".format(self.boost_module.generate())
         device_code = "{}\n".format(self.generate())
 
-        from codepy.jit import compile_from_string
-        from codepy.jit import link_extension
+        from codepy.jit import compile_from_string, link_extension
 
         local_host_kwargs = kwargs.copy()
         local_host_kwargs.update(host_kwargs)
