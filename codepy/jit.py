@@ -27,8 +27,8 @@ THE SOFTWARE.
 """
 
 import logging
-
-from pytools import Record
+from dataclasses import dataclass
+from typing import List, NamedTuple
 
 from codepy import CompileError
 
@@ -214,8 +214,16 @@ class _InvalidInfoFile(RuntimeError):
     pass
 
 
-class _SourceInfo(Record):
-    pass
+class _Dependency(NamedTuple):
+    name: str
+    mtime: int
+    md5: str
+
+
+@dataclass(frozen=True)
+class _SourceInfo:
+    dependencies: List[NamedTuple]
+    source_name: str
 
 
 def compile_from_string(toolchain, name, source_string,
@@ -311,10 +319,9 @@ def compile_from_string(toolchain, name, source_string,
         return checksum.hexdigest()
 
     def get_dep_structure(source_paths):
-        deps = list(toolchain.get_dependencies(source_paths))
-        deps.sort()
-        return [(dep, os.stat(dep).st_mtime, get_file_md5sum(dep)) for dep in deps
-                if dep not in source_paths]
+        deps = toolchain.get_dependencies(source_paths)
+        return [_Dependency(dep, os.stat(dep).st_mtime, get_file_md5sum(dep))
+                for dep in sorted(deps) if dep not in source_paths]
 
     def write_source(name):
         for i, source in enumerate(source_string):
