@@ -2,8 +2,9 @@ import pytest
 
 
 def make_greet_mod(greeting):
-    from cgen import FunctionBody, FunctionDeclaration, Block, \
-            Const, Pointer, Value, Statement
+    from cgen import (
+        Block, Const, FunctionBody, FunctionDeclaration, Pointer, Statement, Value)
+
     from codepy.bpl import BoostPythonModule
 
     mod = BoostPythonModule()

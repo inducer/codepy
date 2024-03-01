@@ -1,5 +1,8 @@
 import cgen as c
+
 from codepy.bpl import BoostPythonModule
+
+
 mod = BoostPythonModule()
 
 mod.add_function(
@@ -9,6 +12,8 @@ mod.add_function(
             ))
 
 from codepy.toolchain import guess_toolchain
+
+
 cmod = mod.compile(guess_toolchain())
 
 print(cmod.greet())

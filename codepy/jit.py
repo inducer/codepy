@@ -26,15 +26,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-from codepy import CompileError
+import logging
+
 from pytools import Record
 
-import logging
+from codepy import CompileError
+
+
 logger = logging.getLogger(__name__)
 
 
 def _erase_dir(dir):
-    from os import listdir, unlink, rmdir
+    from os import listdir, rmdir, unlink
     from os.path import join
     for name in listdir(dir):
         unlink(join(dir, name))
@@ -479,6 +482,8 @@ def link_extension(toolchain, objects, mod_name, cache_dir=None,
 
 
 from pytools import MovedFunctionDeprecationWrapper  # noqa: E402
+
 from codepy.toolchain import guess_toolchain as _gtc  # noqa: E402
+
 
 guess_toolchain = MovedFunctionDeprecationWrapper(_gtc)

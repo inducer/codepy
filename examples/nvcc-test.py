@@ -1,7 +1,9 @@
 import cgen as c
+from cgen.cuda import CudaGlobal
+
 from codepy.bpl import BoostPythonModule
 from codepy.cuda import CudaModule
-from cgen.cuda import CudaGlobal
+
 
 # This file tests the ability to use compile and link CUDA code into the
 # Python interpreter.  Running this test requires PyCUDA
@@ -11,9 +13,11 @@ from cgen.cuda import CudaGlobal
 # The host module should include a function which is callable from Python
 host_mod = BoostPythonModule()
 
+import math
 # Are we on a 32 or 64 bit platform?
 import sys
-import math
+
+
 bitness = math.log(sys.maxsize) + 1
 ptr_sz_uint_conv = "K" if bitness > 32 else "I"
 
@@ -99,16 +103,17 @@ cuda_mod.add_function(diff_instance)
 import codepy.jit
 import codepy.toolchain
 
+
 gcc_toolchain = codepy.toolchain.guess_toolchain()
 nvcc_toolchain = codepy.toolchain.guess_nvcc_toolchain()
 
 module = cuda_mod.compile(gcc_toolchain, nvcc_toolchain, debug=True)
+import numpy as np
 import pycuda.autoinit
 import pycuda.driver
-
-
 import pycuda.gpuarray
-import numpy as np
+
+
 length = 25
 constant_value = 2
 # This is a strange way to create a GPUArray, but is meant to illustrate

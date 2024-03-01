@@ -1,6 +1,7 @@
-from codepy.toolchain import guess_toolchain
-from codepy.jit import compile_from_string
 from ctypes import CDLL
+
+from codepy.jit import compile_from_string
+from codepy.toolchain import guess_toolchain
 
 
 def test():

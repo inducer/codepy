@@ -58,7 +58,7 @@ class BoostPythonModule:
         if py_name is None:
             py_name = name
 
-        from cgen import (Block, Typedef, Line, Statement, Value)
+        from cgen import Block, Line, Statement, Typedef, Value
 
         self.init_body.append(
             Block([
@@ -134,8 +134,7 @@ class BoostPythonModule:
         module line-by-line.
         """
 
-        from cgen import Block, Module, Include, Line, Define, \
-                PrivateNamespace
+        from cgen import Block, Define, Include, Line, Module, PrivateNamespace
 
         body = []
 
