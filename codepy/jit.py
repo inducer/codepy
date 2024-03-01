@@ -206,7 +206,7 @@ def extension_from_string(toolchain, name, source_string,
                             cache_dir, debug, wait_on_error, debug_recompile,
                             False, sleep_delay=sleep_delay)
     # try loading it
-    from imp import load_dynamic
+    from codepy.tools import load_dynamic
     return load_dynamic(mod_name, ext_file)
 
 
@@ -484,7 +484,7 @@ def link_extension(toolchain, objects, mod_name, cache_dir=None,
             raise
 
     # try loading it
-    from imp import load_dynamic
+    from codepy.tools import load_dynamic
     return load_dynamic(mod_name, destination)
 
 

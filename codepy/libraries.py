@@ -115,10 +115,10 @@ def add_boost_numeric_bindings(toolchain):
 
 def add_numpy(toolchain):
     def get_numpy_incpath():
-        from imp import find_module
-        file, pathname, descr = find_module("numpy")
+        from importlib.util import find_spec
+        spec = find_spec("numpy")
         from os.path import join
-        return join(pathname, "core", "include")
+        return join(spec.submodule_search_locations[0], "core", "include")
 
     toolchain.add_library("numpy", [get_numpy_incpath()], [], [])
 

@@ -30,3 +30,24 @@ def join_continued_lines(lines):
             warn("line continuation at end of file")
 
     return result
+
+
+def load_dynamic(name: str, path: str):
+    """Implementation of ``imp.load_dynamic`` based on :mod:`importlib`."""
+    # https://github.com/python/cpython/pull/105951
+
+    from importlib.machinery import ExtensionFileLoader
+
+    loader = ExtensionFileLoader(name, path)
+
+    from importlib.util import module_from_spec, spec_from_loader
+
+    spec = spec_from_loader(name, loader)
+    module = module_from_spec(spec)
+
+    # The module is always executed and not cached in sys.modules.
+    # Uncomment the following line to cache the module.
+    # sys.modules[module.__name__] = module
+
+    loader.exec_module(module)
+    return module

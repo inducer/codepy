@@ -105,7 +105,7 @@ class CudaModule:
             module_path = os.path.join(destination_base, mod_name
                                        + host_toolchain.so_ext)
             try:
-                from imp import load_dynamic
+                from codepy.tools import load_dynamic
                 return load_dynamic(mod_name, module_path)
             except Exception:
                 return link_extension(host_toolchain,
