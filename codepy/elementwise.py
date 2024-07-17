@@ -171,15 +171,20 @@ class ElementwiseKernel:
 @memoize
 def make_linear_comb_kernel_with_result_dtype(
         result_dtype, scalar_dtypes, vector_dtypes):
-    comp_count = len(vector_dtypes)
     from pytools import flatten
-    return ElementwiseKernel([VectorArg(result_dtype, "result")] + list(flatten(
-            (ScalarArg(scalar_dtypes[i], f"a{i}_fac"),
-                VectorArg(vector_dtypes[i], f"a{i}"))
-            for i in range(comp_count))),
-            "result[i] = " + " + ".join(
-                f"a{i}_fac*a{i}[i]" for i in range(comp_count)
-                ))
+
+    comp_count = len(vector_dtypes)
+
+    args = flatten(
+        (ScalarArg(scalar_dtypes[i], f"a{i}_fac"),
+         VectorArg(vector_dtypes[i], f"a{i}"))
+        for i in range(comp_count)
+    )
+    return ElementwiseKernel(
+        [VectorArg(result_dtype, "result"), *args],
+        "result[i] = " + " + ".join(
+            f"a{i}_fac*a{i}[i]" for i in range(comp_count)
+        ))
 
 
 @memoize

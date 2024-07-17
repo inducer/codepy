@@ -110,7 +110,7 @@ class BoostPythonModule:
         member_defs = []
         for f in struct.fields:
             py_f_name = py_member_name_transform(f.name)
-            tp_lines, declarator = f.get_decl_pair()
+            tp_lines, _ = f.get_decl_pair()
             if f.name in by_value_members or tp_lines[0].startswith("numpy_"):
                 member_defs.append(
                         ".def(pyublas::by_value_rw_member"
@@ -146,11 +146,15 @@ class BoostPythonModule:
         else:
             mod_body = self.mod_body
 
-        body += ([Include("boost/python.hpp")]
-                + self.preamble + [Line()]
-                + mod_body
-                + [Line(), Line(f"BOOST_PYTHON_MODULE({self.name})")]
-                + [Block(self.init_body)])
+        body += [
+            Include("boost/python.hpp"),
+            *self.preamble,
+            Line(),
+            *mod_body,
+            Line(),
+            Line(f"BOOST_PYTHON_MODULE({self.name})"),
+            Block(self.init_body),
+        ]
 
         return Module(body)
 

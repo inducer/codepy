@@ -45,7 +45,7 @@ class CudaModule:
         module line-by-line.
         """
         body = []
-        body += (self.preamble + [cgen.Line()] + self.body)
+        body += [*self.preamble, cgen.Line(), *self.body]
         return cgen.Module(body)
 
     def compile(self, host_toolchain, nvcc_toolchain,
@@ -81,11 +81,11 @@ class CudaModule:
 
         # Don't compile shared objects, just normal objects
         # (on some platforms, they're different)
-        host_checksum, host_mod_name, host_object, host_compiled = \
+        host_checksum, _host_mod_name, host_object, host_compiled = \
                 compile_from_string(
                         host_toolchain, self.boost_module.name, host_code,
                         object=True, **local_host_kwargs)
-        device_checksum, device_mod_name, device_object, device_compiled = \
+        device_checksum, _device_mod_name, device_object, device_compiled = \
                 compile_from_string(
                         nvcc_toolchain, "gpu", device_code, "gpu.cu",
                         object=True, **local_nvcc_kwargs)
@@ -101,7 +101,7 @@ class CudaModule:
         else:
             import os.path
 
-            destination_base, first_object = os.path.split(host_object)
+            destination_base, _ = os.path.split(host_object)
             module_path = os.path.join(destination_base, mod_name
                                        + host_toolchain.so_ext)
             try:
