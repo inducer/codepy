@@ -1,9 +1,9 @@
-Flake8:
-  script:
-  - curl -L -O https://gitlab.tiker.net/inducer/ci-support/raw/main/prepare-and-run-flake8.sh
-  - ". ./prepare-and-run-flake8.sh codepy test"
+Ruff:
+  script: |
+    pipx install ruff
+    ruff check
   tags:
-  - python3
+  - docker-runner
   except:
   - tags
 
