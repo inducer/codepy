@@ -194,10 +194,7 @@ class GCCLikeToolchain(Toolchain):
             line.split()[2:] for line in lines))
 
     def build_object(self, ext_file, source_files, debug=False):
-        cc_cmdline = (
-                self._cmdline(source_files, True)
-                + ["-o", ext_file]
-                )
+        cc_cmdline = [*self._cmdline(source_files, True), "-o", ext_file]
 
         from pytools.prefork import call
         if debug:
@@ -212,10 +209,7 @@ class GCCLikeToolchain(Toolchain):
             raise CompileError("module compilation failed")
 
     def build_extension(self, ext_file, source_files, debug=False):
-        cc_cmdline = (
-                self._cmdline(source_files, False)
-                + ["-o", ext_file]
-                )
+        cc_cmdline = [*self._cmdline(source_files, False), "-o", ext_file]
 
         from pytools.prefork import call
         if debug:
@@ -230,10 +224,7 @@ class GCCLikeToolchain(Toolchain):
             raise CompileError("module compilation failed")
 
     def link_extension(self, ext_file, object_files, debug=False):
-        cc_cmdline = (
-                self._cmdline(object_files, False)
-                + ["-o", ext_file]
-                )
+        cc_cmdline = [*self._cmdline(object_files, False), "-o", ext_file]
 
         from pytools.prefork import call
         if debug:
@@ -290,7 +281,7 @@ class GCCToolchain(GCCLikeToolchain):
             )
 
     def abi_id(self):
-        return Toolchain.abi_id(self) + [self._cmdline([])]
+        return [*Toolchain.abi_id(self), self._cmdline([])]
 
     def with_optimization_level(self, level, debug=False, **extra):
         def remove_prefix(flags, prefix):
@@ -353,13 +344,10 @@ class NVCCToolchain(GCCLikeToolchain):
                 )
 
     def abi_id(self):
-        return Toolchain.abi_id(self) + [self._cmdline([])]
+        return [*Toolchain.abi_id(self), self._cmdline([])]
 
     def build_object(self, ext_file, source_files, debug=False):
-        cc_cmdline = (
-                self._cmdline(source_files, True)
-                + ["-o", ext_file]
-                )
+        cc_cmdline = [*self._cmdline(source_files, True), "-o", ext_file]
 
         if debug:
             print(" ".join(cc_cmdline))

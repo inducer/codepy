@@ -99,11 +99,13 @@ def add_boost_python(toolchain):
             "boost-python",
             aksetup.get("BOOST_INC_DIR", []),
             aksetup.get("BOOST_LIB_DIR", []),
-            get_boost_libname("python-py{}{}".format(*sys.version_info[:2]), aksetup)
-            + ["python{}.{}{}".format(
-                *sys.version_info[:2],
-                "m" if sys.version_info[0] >= 3 else "")]
-            )
+            [
+                *get_boost_libname("python-py{}{}".format(*sys.version_info[:2]),
+                                   aksetup),
+                "python{}.{}{}".format(
+                    *sys.version_info[:2],
+                    "m" if sys.version_info[0] >= 3 else "")
+            ])
 
 
 def add_boost_numeric_bindings(toolchain):

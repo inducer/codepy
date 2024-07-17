@@ -128,8 +128,8 @@ class CacheLockManager(CleanupBase):
 
                 if attempts > 10:
                     from warnings import warn
-                    warn("could not obtain lock -- "
-                            f"delete '{self.lock_file}' if necessary")
+                    warn(f"could not obtain lock -- delete '{self.lock_file}' "
+                         "if necessary", stacklevel=2)
 
             cleanup_m.register(self)
 
@@ -201,16 +201,17 @@ def extension_from_string(toolchain, name, source_string,
     If *debug_recompile*, messages are printed indicating whether a
     recompilation is taking place.
     """
-    checksum, mod_name, ext_file, recompiled = \
+    _checksum, mod_name, ext_file, _recompiled = (
         compile_from_string(toolchain, name, source_string, source_name,
                             cache_dir, debug, wait_on_error, debug_recompile,
-                            False, sleep_delay=sleep_delay)
+                            False, sleep_delay=sleep_delay))
+
     # try loading it
     from codepy.tools import load_dynamic
     return load_dynamic(mod_name, ext_file)
 
 
-class _InvalidInfoFile(RuntimeError):
+class _InvalidInfoFileError(RuntimeError):
     pass
 
 
@@ -280,7 +281,7 @@ def compile_from_string(toolchain, name, source_string,
     if wait_on_error is not None:
         from warnings import warn
         warn("wait_on_error is deprecated and has no effect",
-                DeprecationWarning)
+             DeprecationWarning, stacklevel=2)
 
     import os
 
@@ -351,13 +352,13 @@ def compile_from_string(toolchain, name, source_string,
 
         try:
             info_file = open(info_path, "rb")
-        except OSError:
-            raise _InvalidInfoFile()
+        except OSError as exc:
+            raise _InvalidInfoFileError() from exc
 
         try:
             return pickle.load(info_file)
-        except EOFError:
-            raise _InvalidInfoFile()
+        except EOFError as exc:
+            raise _InvalidInfoFileError() from exc
         finally:
             info_file.close()
 
@@ -399,7 +400,7 @@ def compile_from_string(toolchain, name, source_string,
 
             if not valid:
                 from warnings import warn
-                warn("hash collision in compiler cache")
+                warn("hash collision in compiler cache", stacklevel=2)
         return valid
 
     cleanup_m = CleanupManager()
@@ -424,7 +425,7 @@ def compile_from_string(toolchain, name, source_string,
         if mod_cache_dir_m.existed:
             try:
                 info = load_info(info_path)
-            except _InvalidInfoFile:
+            except _InvalidInfoFileError:
                 mod_cache_dir_m.reset()
 
                 if debug_recompile:
@@ -472,7 +473,7 @@ def link_extension(toolchain, objects, mod_name, cache_dir=None,
         destination = os.path.join(cache_dir, mod_name + toolchain.so_ext)
     else:
         # put the linked object in the same directory as the first object
-        destination_base, first_object = os.path.split(objects[0])
+        destination_base, _ = os.path.split(objects[0])
         destination = os.path.join(
                 destination_base,
                 mod_name + toolchain.so_ext)
@@ -488,9 +489,9 @@ def link_extension(toolchain, objects, mod_name, cache_dir=None,
     return load_dynamic(mod_name, destination)
 
 
-from pytools import MovedFunctionDeprecationWrapper  # noqa: E402
+from pytools import MovedFunctionDeprecationWrapper
 
-from codepy.toolchain import guess_toolchain as _gtc  # noqa: E402
+from codepy.toolchain import guess_toolchain as _gtc
 
 
 guess_toolchain = MovedFunctionDeprecationWrapper(_gtc)

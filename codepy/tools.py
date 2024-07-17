@@ -27,7 +27,7 @@ def join_continued_lines(lines):
     except StopIteration:
         if append_line:
             from warnings import warn
-            warn("line continuation at end of file")
+            warn("line continuation at end of file", stacklevel=2)
 
     return result
 
