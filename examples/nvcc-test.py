@@ -14,6 +14,7 @@ from codepy.cuda import CudaModule
 host_mod = BoostPythonModule()
 
 import math
+
 # Are we on a 32 or 64 bit platform?
 import sys
 
