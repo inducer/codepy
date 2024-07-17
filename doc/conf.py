@@ -1,5 +1,6 @@
 from urllib.request import urlopen
 
+
 _conf_url = \
         "https://raw.githubusercontent.com/inducer/sphinxconfig/main/sphinxconfig.py"
 with urlopen(_conf_url) as _inf:
@@ -9,6 +10,8 @@ copyright = "2009-21, Andreas Kloeckner"
 
 # The short X.Y version.
 import re
+
+
 ver_re = re.compile(r'version\s*=\s*"([0-9a-z.]+)"')
 version = [ver_re.search(line).group(1)
         for line in open("../setup.py").readlines()

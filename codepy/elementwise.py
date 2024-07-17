@@ -5,8 +5,8 @@ __copyright__ = "Copyright (C) 2009 Andreas Kloeckner"
 
 
 import numpy
-from cgen import POD, Value, dtype_to_ctype
 
+from cgen import POD, Value, dtype_to_ctype
 from pytools import memoize
 
 
@@ -48,8 +48,18 @@ class ScalarArg(Argument):
 
 def get_elwise_module_descriptor(arguments, operation, name="kernel"):
     from cgen import (
-        POD, Block, For, FunctionBody, FunctionDeclaration, Include, Initializer,
-        Line, Statement, Struct, Value)
+        POD,
+        Block,
+        For,
+        FunctionBody,
+        FunctionDeclaration,
+        Include,
+        Initializer,
+        Line,
+        Statement,
+        Struct,
+        Value,
+    )
 
     from codepy.bpl import BoostPythonModule
 
