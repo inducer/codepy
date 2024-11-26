@@ -286,14 +286,12 @@ def compile_from_string(toolchain, name, source_string,
     import os
 
     if cache_dir is None:
-        try:
-            import platformdirs as appdirs
-        except ImportError:
-            import appdirs
-
         import sys
+
+        import platformdirs
+
         cache_dir = os.path.join(
-                appdirs.user_cache_dir("codepy", "codepy"),
+                platformdirs.user_cache_dir("codepy", "codepy"),
                 "codepy-compiler-cache-v5-py{}".format(
                     ".".join(str(i) for i in sys.version_info)))
 
@@ -305,13 +303,8 @@ def compile_from_string(toolchain, name, source_string,
                 raise
 
     def get_file_md5sum(fname):
-        try:
-            import hashlib
-            checksum = hashlib.md5()
-        except ImportError:
-            # for Python << 2.5
-            import md5
-            checksum = md5.new()
+        import hashlib
+        checksum = hashlib.md5()
 
         inf = open(fname, "rb")
         checksum.update(inf.read())
@@ -331,13 +324,8 @@ def compile_from_string(toolchain, name, source_string,
             outf.close()
 
     def calculate_hex_checksum():
-        try:
-            import hashlib
-            checksum = hashlib.md5()
-        except ImportError:
-            # for Python << 2.5
-            import md5
-            checksum = md5.new()
+        import hashlib
+        checksum = hashlib.md5()
 
         for source in source_string:
             if source_is_binary:

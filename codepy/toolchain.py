@@ -89,7 +89,7 @@ class Toolchain(ABC):
             if ldir not in self.library_dirs:
                 self.library_dirs.append(ldir)
 
-        self.libraries = libraries + self.libraries
+        object.__setattr__(self, "libraries", libraries + self.libraries)
 
     @abstractmethod
     def get_dependencies(self,  source_files):
@@ -169,7 +169,9 @@ class GCCLikeToolchain(Toolchain):
         return stdout
 
     def enable_debugging(self):
-        self.cflags = [f for f in self.cflags if not f.startswith("-O")] + ["-g"]
+        object.__setattr__(
+            self, "cflags",
+            [f for f in self.cflags if not f.startswith("-O")] + ["-g"])
 
     def get_dependencies(self, source_files):
         from codepy.tools import join_continued_lines
