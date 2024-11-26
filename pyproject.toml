@@ -6,14 +6,14 @@ requires = [
 
 [project]
 name = "codepy"
-version = "2019.1"
-description = "Generate and execute native code at run time."
+version = "2024.1"
+description = "Generate and execute native code at run time"
 readme = "README.rst"
 license = { text = "MIT" }
 authors = [
     { name = "Andreas Kloeckner", email = "inform@tiker.net" },
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
