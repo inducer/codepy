@@ -43,6 +43,9 @@ def load_dynamic(name: str, path: str):
     from importlib.util import module_from_spec, spec_from_loader
 
     spec = spec_from_loader(name, loader)
+    if spec is None:
+        raise RuntimeError(f"Could not load module '{name}' in '{path}'")
+
     module = module_from_spec(spec)
 
     # The module is always executed and not cached in sys.modules.

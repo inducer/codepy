@@ -194,25 +194,3 @@ def make_linear_comb_kernel(scalar_dtypes, vector_dtypes):
 
     return make_linear_comb_kernel_with_result_dtype(
             result_dtype, scalar_dtypes, vector_dtypes), result_dtype
-
-
-if __name__ == "__main__":
-    import pyublas  # noqa: F401
-
-    a = numpy.random.rand(50000)
-    b = numpy.random.rand(50000)
-
-    dtype = a.dtype
-
-    lin_comb = ElementwiseKernel([
-            ScalarArg(dtype, "a_fac"), VectorArg(dtype, "a"),
-            ScalarArg(dtype, "b_fac"), VectorArg(dtype, "b"),
-            VectorArg(dtype, "c"),
-            ],
-            "c[i] = a_fac*a[i] + b_fac*b[i]")
-
-    c = numpy.empty_like(a)
-    lin_comb(5, a, 6, b, c)
-
-    import numpy.linalg as la
-    print(la.norm(c - (5*a+6*b)))
