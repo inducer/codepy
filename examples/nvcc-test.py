@@ -127,7 +127,7 @@ a = pycuda.gpuarray.GPUArray((length,), np.int32, gpudata=pointer)
 b = module.adjacentDifference(a).get()
 
 golden = [constant_value] + [0] * (length - 1)
-difference = [(x-y)*(x-y) for x, y in zip(b, golden)]
+difference = [(x-y)*(x-y) for x, y in zip(b, golden, strict=True)]
 error = sum(difference)
 if error == 0:
     print("Test passed!")

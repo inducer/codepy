@@ -28,7 +28,7 @@ THE SOFTWARE.
 
 import logging
 from dataclasses import dataclass
-from typing import List, NamedTuple
+from typing import NamedTuple
 
 from codepy import CompileError
 
@@ -223,7 +223,7 @@ class _Dependency(NamedTuple):
 
 @dataclass(frozen=True)
 class _SourceInfo:
-    dependencies: List[NamedTuple]
+    dependencies: list[_Dependency]
     source_name: str
 
 
