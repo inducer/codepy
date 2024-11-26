@@ -1,8 +1,6 @@
 [build-system]
-build-backend = "setuptools.build_meta"
-requires = [
-    "setuptools>=63",
-]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "codepy"
@@ -42,16 +40,6 @@ test = [
 [project.urls]
 Documentation = "https://documen.tician.de/codepy"
 Homepage = "https://github.com/inducer/codepy"
-
-[tool.setuptools.packages.find]
-include = [
-    "codepy*",
-]
-
-[tool.setuptools.package-data]
-codepy = [
-    "include/codepy/bpl.hpp",
-]
 
 [tool.ruff]
 preview = true
