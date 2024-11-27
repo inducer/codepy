@@ -2,11 +2,15 @@
 
 __copyright__ = "Copyright (C) 2008 Andreas Kloeckner"
 
+from collections.abc import Sequence
+from typing import Any
 
 from pytools import memoize
 
+from codepy.toolchain import Toolchain
 
-def search_on_path(filenames):
+
+def search_on_path(filenames: Sequence[str]) -> str | None:
     """Find file on system path."""
     # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/52224
 
@@ -21,26 +25,50 @@ def search_on_path(filenames):
             if exists(join(path, filename)):
                 return abspath(join(path, filename))
 
+    return None
+
 
 # {{{ aksetup handling
 
-def expand_str(s, options):
-    import re
+Config = dict[str, Any]
 
-    def my_repl(match):
+
+def getstring(options: Config, key: str, default: str | None = None) -> str | None:
+    value = options.get(key)
+    if value is None:
+        return default
+
+    assert isinstance(value, str)
+    return value
+
+
+def getlist(options: Config, key: str, default: list[str]) -> list[str]:
+    value = options.get(key)
+    if value is None:
+        return default
+
+    assert isinstance(value, list)
+    return value
+
+
+def expand_str(s: str, options: Config) -> str:
+    import re
+    from os import environ
+
+    def my_repl(match: re.Match[str]) -> str:
         sym = match.group(1)
         try:
             repl = options[sym]
         except KeyError:
-            from os import environ
             repl = environ[sym]
 
+        assert isinstance(repl, str)
         return expand_str(repl, options)
 
     return re.subn(r"\$\{([a-zA-Z0-9_]+)\}", my_repl, s)[0]
 
 
-def expand_value(v, options):
+def expand_value(v: Any, options: Config) -> Any:
     if isinstance(v, str):
         return expand_str(v, options)
     elif isinstance(v, list):
@@ -49,18 +77,19 @@ def expand_value(v, options):
         return v
 
 
-def expand_options(options):
-    for k in options.keys():
+def expand_options(options: Config) -> Config:
+    for k in options:
         options[k] = expand_value(options[k], options)
+
     return options
 
 
 @memoize
-def get_aksetup_config():
-    def update_config(fname):
+def get_aksetup_config() -> Config:
+    def update_config(fname: str) -> None:
         import os
         if os.access(fname, os.R_OK):
-            filevars = {}
+            filevars: dict[str, str] = {}
 
             with open(fname) as cf_file:
                 file_contents = cf_file.read()
@@ -70,11 +99,12 @@ def get_aksetup_config():
                 if key != "__builtins__":
                     config[key] = value
 
-    config = {}
+    import sys
     from os.path import expanduser
+
+    config: Config = {}
     update_config(expanduser("~/.aksetup-defaults.py"))
 
-    import sys
     if not sys.platform.lower().startswith("win"):
         update_config(expanduser("/etc/aksetup-defaults.py"))
 
@@ -85,20 +115,20 @@ def get_aksetup_config():
 
 # {{{ libraries
 
-def get_boost_libname(basename, aksetup):
-    try:
-        return aksetup[f"BOOST_{basename.upper()}_LIBNAME"]
-    except KeyError:
-        return [f"boost_{basename}"]
+def get_boost_libname(basename: str, aksetup: Config) -> list[str]:
+    varname = f"BOOST_{basename.upper()}_LIBNAME"
+    libs = getlist(aksetup, varname, [f"boost_{basename}"])
+
+    return libs
 
 
-def add_boost_python(toolchain):
+def add_boost_python(toolchain: Toolchain) -> None:
     aksetup = get_aksetup_config()
     import sys
     toolchain.add_library(
             "boost-python",
-            aksetup.get("BOOST_INC_DIR", []),
-            aksetup.get("BOOST_LIB_DIR", []),
+            getlist(aksetup, "BOOST_INC_DIR", []),
+            getlist(aksetup, "BOOST_LIB_DIR", []),
             [
                 *get_boost_libname("python-py{}{}".format(*sys.version_info[:2]),
                                    aksetup),
@@ -108,57 +138,63 @@ def add_boost_python(toolchain):
             ])
 
 
-def add_boost_numeric_bindings(toolchain):
+def add_boost_numeric_bindings(toolchain: Toolchain) -> None:
     aksetup = get_aksetup_config()
     toolchain.add_library(
             "boost-numeric-bindings",
-            aksetup.get("BOOST_BINDINGS_INC_DIR", []), [], [])
+            getlist(aksetup, "BOOST_BINDINGS_INC_DIR", []), [], [])
 
 
-def add_numpy(toolchain):
-    def get_numpy_incpath():
+def add_numpy(toolchain: Toolchain) -> None:
+    def get_numpy_incpath() -> str:
         from importlib.util import find_spec
         spec = find_spec("numpy")
+        if spec is None:
+            raise RuntimeError("Could not find 'numpy' module")
+
+        libdir = spec.submodule_search_locations
+        assert libdir is not None
+
         from os.path import join
-        return join(spec.submodule_search_locations[0], "core", "include")
+        return join(libdir[0], "core", "include")
 
     toolchain.add_library("numpy", [get_numpy_incpath()], [], [])
 
 
-def add_py_module(toolchain, name):
-    def get_module_include_path(name):
+def add_py_module(toolchain: Toolchain, name: str) -> None:
+    def get_module_include_path(name: str) -> str:
         from pkg_resources import Requirement, resource_filename
         return resource_filename(Requirement.parse(name), f"{name}/include")
 
     toolchain.add_library(name, [get_module_include_path(name)], [], [])
 
 
-def add_codepy(toolchain):
+def add_codepy(toolchain: Toolchain) -> None:
     add_py_module(toolchain, "codepy")
 
 
-def add_pyublas(toolchain):
+def add_pyublas(toolchain: Toolchain) -> None:
     add_boost_python(toolchain)
     add_numpy(toolchain)
     add_py_module(toolchain, "pyublas")
 
 
-def add_hedge(toolchain):
+def add_hedge(toolchain: Toolchain) -> None:
     add_pyublas(toolchain)
     add_boost_numeric_bindings(toolchain)
     add_py_module(toolchain, "hedge")
 
 
-def add_cuda(toolchain):
+def add_cuda(toolchain: Toolchain) -> None:
     conf = get_aksetup_config()
-    cuda_lib_path = conf.get("CUDADRV_LIB_DIR", [])
-    cuda_library = conf.get("CUDADRV_LIBNAME", ["cuda"])
-    cuda_include_path = conf.get("CUDA_INC_DIR", [])
+    cuda_lib_path: list[str] = getlist(conf, "CUDADRV_LIB_DIR", [])
+    cuda_library: list[str] = getlist(conf, "CUDADRV_LIBNAME", ["cuda"])
+    cuda_include_path: list[str] = getlist(conf, "CUDA_INC_DIR", [])
 
     if not cuda_include_path or not cuda_lib_path:
         from os.path import dirname, join, normpath
 
-        cuda_root = conf.get("CUDA_ROOT")
+        cuda_root = getstring(conf, "CUDA_ROOT")
 
         if cuda_root is None:
             nvcc_path = search_on_path(["nvcc", "nvcc.exe"])
@@ -174,8 +210,8 @@ def add_cuda(toolchain):
         if not cuda_lib_path:
             cuda_lib_path = [join(cuda_root, "lib"), join(cuda_root, "lib64")]
 
-    cuda_rt_path = conf.get("CUDART_LIB_DIR", cuda_lib_path)
-    cuda_rt_library = conf.get("CUDART_LIBNAME", ["cudart"])
+    cuda_rt_path: list[str] = getlist(conf, "CUDART_LIB_DIR", cuda_lib_path)
+    cuda_rt_library: list[str] = getlist(conf, "CUDART_LIBNAME", ["cudart"])
 
     toolchain.add_library("cuda", cuda_include_path,
                           cuda_lib_path + cuda_rt_path,
