@@ -28,6 +28,6 @@ def test():
 
     # test module
     dll = CDLL(ext_file)
-    _fn = dll.greet
-    _fn.restype = int
-    assert _fn() == 1
+    fn = dll.greet
+    fn.restype = int
+    assert fn() == 1
