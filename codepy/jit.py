@@ -66,10 +66,10 @@ def extension_file_from_string(
     src_dir = mkdtemp()
 
     from os.path import join
+
     source_file = join(src_dir, source_name)
-    outf = open(source_file, "w")
-    outf.write(str(source_string))
-    outf.close()
+    with open(source_file, "w") as outf:
+        outf.write(str(source_string))
 
     try:
         toolchain.build_extension(ext_file, [source_file], debug=debug)
@@ -344,10 +344,9 @@ def compile_from_string(
         import hashlib
         checksum = hashlib.md5()
 
-        inf = open(fname, "rb")
-        checksum.update(inf.read())
+        with open(fname, "rb") as inf:
+            checksum.update(inf.read())
 
-        inf.close()
         return checksum.hexdigest()
 
     def get_dep_structure(source_paths: list[str]) -> list[_Dependency]:
@@ -357,9 +356,8 @@ def compile_from_string(
 
     def write_source(name: list[str]) -> None:
         for i, source in enumerate(source_string):
-            outf = open(name[i], "w" if not source_is_binary else "wb")
-            outf.write(source)
-            outf.close()
+            with open(name[i], "w" if not source_is_binary else "wb") as outf:
+                outf.write(source)
 
     def calculate_hex_checksum() -> str:
         import hashlib
@@ -480,11 +478,10 @@ def compile_from_string(
         if info_path is not None:
             import pickle
 
-            info_file = open(info_path, "wb")
-            pickle.dump(_SourceInfo(
-                dependencies=get_dep_structure(source_paths),
-                source_name=source_name), info_file)
-            info_file.close()
+            with open(info_path, "wb") as info_file:
+                pickle.dump(_SourceInfo(
+                    dependencies=get_dep_structure(source_paths),
+                    source_name=source_name), info_file)
 
         return hex_checksum, mod_name, ext_file, True
     except Exception:
