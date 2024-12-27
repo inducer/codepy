@@ -526,6 +526,7 @@ def guess_nvcc_toolchain() -> NVCCToolchain:
 
     kwargs = {
             "cc": "nvcc",
+            "ld": gcc_kwargs["ld"],
             "ldflags": [],
             "libraries": gcc_kwargs["libraries"],
             "cflags": ["-Xcompiler", ",".join(gcc_kwargs["cflags"])],
@@ -535,6 +536,7 @@ def guess_nvcc_toolchain() -> NVCCToolchain:
             "o_ext": gcc_kwargs["o_ext"],
             "defines": gcc_kwargs["defines"],
             "undefines": gcc_kwargs["undefines"],
+            "features": set(),
             }
     kwargs.setdefault("undefines", []).append("__BLOCKS__")
 
