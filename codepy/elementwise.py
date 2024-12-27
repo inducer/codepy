@@ -1,21 +1,40 @@
 """Elementwise functionality."""
 
-
 __copyright__ = "Copyright (C) 2009 Andreas Kloeckner"
 
+from abc import ABC, abstractmethod
+from collections.abc import Callable, Sequence
+from types import ModuleType
+from typing import Any
 
-import numpy
+import numpy as np
 
-from cgen import POD, Value, dtype_to_ctype
+from cgen import POD, Declarator, Value, dtype_to_ctype
 from pytools import memoize
 
+from codepy.bpl import BoostPythonModule
+from codepy.toolchain import Toolchain
 
-class Argument:
-    def __init__(self, dtype, name):
-        self.dtype = numpy.dtype(dtype)
+
+class Argument(ABC):
+    def __init__(self, dtype: Any, name: str) -> None:
+        self.dtype = np.dtype(dtype)
         self.name = name
 
-    def __repr__(self):
+    @abstractmethod
+    def declarator(self) -> Declarator:
+        pass
+
+    @abstractmethod
+    def arg_name(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def struct_char(self) -> str:
+        pass
+
+    def __repr__(self) -> str:
         return "{}({!r}, {})".format(
                 self.__class__.__name__,
                 self.name,
@@ -23,32 +42,36 @@ class Argument:
 
 
 class VectorArg(Argument):
-    def declarator(self):
+    def declarator(self) -> Value:
         return Value(
                 "numpy_array<{} >".format(dtype_to_ctype(self.dtype)),
                 f"{self.name}_ary")
 
-    def arg_name(self):
+    def arg_name(self) -> str:
         return f"{self.name}_ary"
 
-    struct_char = "P"
+    @property
+    def struct_char(self) -> str:
+        return "P"
 
 
 class ScalarArg(Argument):
-    def declarator(self):
+    def declarator(self) -> POD:
         return POD(self.dtype, self.name)
 
-    def arg_name(self):
+    def arg_name(self) -> str:
         return self.name
 
     @property
-    def struct_char(self):
-        return self.dtype.char
+    def struct_char(self) -> str:
+        return str(self.dtype.char)
 
 
-def get_elwise_module_descriptor(arguments, operation, name="kernel"):
+def get_elwise_module_descriptor(
+        arguments: Sequence[Argument],
+        operation: str,
+        name: str = "kernel") -> BoostPythonModule:
     from cgen import (
-        POD,
         Block,
         For,
         FunctionBody,
@@ -58,12 +81,7 @@ def get_elwise_module_descriptor(arguments, operation, name="kernel"):
         Line,
         Statement,
         Struct,
-        Value,
     )
-
-    from codepy.bpl import BoostPythonModule
-
-    S = Statement  # noqa: N806
 
     mod = BoostPythonModule()
     mod.add_to_preamble([
@@ -71,8 +89,8 @@ def get_elwise_module_descriptor(arguments, operation, name="kernel"):
         ])
 
     mod.add_to_module([
-        S("namespace ublas = boost::numeric::ublas"),
-        S("using namespace pyublas"),
+        Statement("namespace ublas = boost::numeric::ublas"),
+        Statement("using namespace pyublas"),
         Line(),
         ])
 
@@ -94,12 +112,11 @@ def get_elwise_module_descriptor(arguments, operation, name="kernel"):
         For("unsigned i = 0",
             "i < codepy_length",
             "++i",
-            Block([S(operation)])
+            Block([Statement(operation)])
             )
         ])
 
-    arg_struct = Struct("arg_struct",
-            [arg.declarator() for arg in arguments])
+    arg_struct = Struct("arg_struct", [arg.declarator() for arg in arguments])
     mod.add_struct(arg_struct, "ArgStruct")
     mod.add_to_module([Line()])
 
@@ -107,14 +124,18 @@ def get_elwise_module_descriptor(arguments, operation, name="kernel"):
             FunctionBody(
                 FunctionDeclaration(
                     Value("void", name),
-                    [POD(numpy.uintp, "codepy_length"),
+                    [POD(np.uintp, "codepy_length"),
                         Value("arg_struct", "args")]),
                 body))
 
     return mod
 
 
-def get_elwise_module_binary(arguments, operation, name="kernel", toolchain=None):
+def get_elwise_module_binary(
+        arguments: Sequence[Argument],
+        operation: str,
+        name: str = "kernel",
+        toolchain: Toolchain | None = None) -> ModuleType:
     if toolchain is None:
         from codepy.toolchain import guess_toolchain
         toolchain = guess_toolchain()
@@ -128,38 +149,49 @@ def get_elwise_module_binary(arguments, operation, name="kernel", toolchain=None
     return get_elwise_module_descriptor(arguments, operation, name).compile(toolchain)
 
 
-def get_elwise_kernel(arguments, operation, name="kernel", toolchain=None):
-    return getattr(get_elwise_module_binary(
-        arguments, operation, name, toolchain), name)
+def get_elwise_kernel(
+        arguments: Sequence[Argument],
+        operation: str,
+        name: str = "kernel",
+        toolchain: Toolchain | None = None) -> Callable[..., Any]:
+    mod = get_elwise_module_binary(arguments, operation, name, toolchain)
+    return getattr(mod, name)  # type: ignore[no-any-return]
 
 
 class ElementwiseKernel:
-    def __init__(self, arguments, operation, name="kernel", toolchain=None):
+    def __init__(self,
+                 arguments: Sequence[Argument],
+                 operation: str,
+                 name: str = "kernel",
+                 toolchain: Toolchain | None = None) -> None:
         self.arguments = arguments
-        self.module = get_elwise_module_binary(
-                arguments, operation, name, toolchain)
+        self.module = get_elwise_module_binary(arguments, operation, name, toolchain)
         self.func = getattr(self.module, name)
 
-        self.vec_arg_indices = [i for i, arg in enumerate(arguments)
-                if isinstance(arg, VectorArg)]
+        self.vec_arg_indices = [
+            i for i, arg in enumerate(arguments)
+            if isinstance(arg, VectorArg)]
 
-        assert self.vec_arg_indices, \
-                "ElementwiseKernel can only be used with functions " \
-                "that have at least one vector argument"
+        if not self.vec_arg_indices:
+            raise ValueError(
+                f"{type(self)} can only be used with functions that have at "
+                f"least one vector argument: {arguments}")
 
-    def __call__(self, *args):
-        args = list(args)
-
+    def __call__(self, *args: Any) -> None:
         from pytools import single_valued
-        size = single_valued(args[i].size for i in self.vec_arg_indices
-                if not (isinstance(args[i], int | float) and args[i] == 0))
+
+        arguments = list(args)
+        size = single_valued(
+                arguments[i].size for i in self.vec_arg_indices
+                if not (isinstance(arguments[i], int | float) and arguments[i] == 0))
+
         for i in self.vec_arg_indices:
-            if isinstance(args[i], int | float) and args[i] == 0:
-                args[i] = numpy.zeros(size, dtype=self.arguments[i].dtype)
+            if isinstance(arguments[i], int | float) and arguments[i] == 0:
+                arguments[i] = np.zeros(size, dtype=self.arguments[i].dtype)
 
         # no need to do type checking--pyublas does that for us
         arg_struct = self.module.ArgStruct()
-        for arg_descr, arg in zip(self.arguments, args, strict=True):
+        for arg_descr, arg in zip(self.arguments, arguments, strict=True):
             setattr(arg_struct, arg_descr.arg_name(), arg)
 
         assert not arg_struct.__dict__
@@ -169,12 +201,18 @@ class ElementwiseKernel:
 
 @memoize
 def make_linear_comb_kernel_with_result_dtype(
-        result_dtype, scalar_dtypes, vector_dtypes):
-    from pytools import flatten
+        result_dtype: Any,
+        scalar_dtypes: tuple[Any, ...],
+        vector_dtypes: tuple[Any, ...]) -> ElementwiseKernel:
+    if len(scalar_dtypes) != len(vector_dtypes):
+        raise ValueError(
+            "'scalar_dtypes' and 'vector_dtypes' do not have the same length"
+        )
+
+    from itertools import chain
 
     comp_count = len(vector_dtypes)
-
-    args = flatten(
+    args = chain.from_iterable(
         (ScalarArg(scalar_dtypes[i], f"a{i}_fac"),
          VectorArg(vector_dtypes[i], f"a{i}"))
         for i in range(comp_count)
@@ -187,9 +225,10 @@ def make_linear_comb_kernel_with_result_dtype(
 
 
 @memoize
-def make_linear_comb_kernel(scalar_dtypes, vector_dtypes):
-    from pytools import common_dtype
-    result_dtype = common_dtype(scalar_dtypes + vector_dtypes)
+def make_linear_comb_kernel(
+        scalar_dtypes: tuple[Any, ...],
+        vector_dtypes: tuple[Any, ...]) -> tuple[ElementwiseKernel, np.dtype[Any]]:
+    result_dtype = np.result_type(*scalar_dtypes, *vector_dtypes)
 
     return make_linear_comb_kernel_with_result_dtype(
             result_dtype, scalar_dtypes, vector_dtypes), result_dtype
