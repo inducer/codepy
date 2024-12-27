@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import cgen
 
 
@@ -62,11 +64,12 @@ class CudaModule:
             nvcc_kwargs = {}
 
         from codepy.libraries import add_boost_python, add_cuda
-        host_toolchain = host_toolchain.copy()
+
+        host_toolchain = replace(host_toolchain)
         add_boost_python(host_toolchain)
         add_cuda(host_toolchain)
 
-        nvcc_toolchain = nvcc_toolchain.copy()
+        nvcc_toolchain = replace(nvcc_toolchain)
         add_cuda(nvcc_toolchain)
 
         host_code = "{}\n".format(self.boost_module.generate())

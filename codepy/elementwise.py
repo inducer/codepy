@@ -118,15 +118,14 @@ def get_elwise_module_binary(arguments, operation, name="kernel", toolchain=None
     if toolchain is None:
         from codepy.toolchain import guess_toolchain
         toolchain = guess_toolchain()
-
-    toolchain = toolchain.copy()
+    else:
+        from dataclasses import replace
+        toolchain = replace(toolchain)
 
     from codepy.libraries import add_pyublas
-    toolchain = toolchain.copy()
-    add_pyublas(toolchain)
 
-    return get_elwise_module_descriptor(arguments, operation, name) \
-            .compile(toolchain)
+    add_pyublas(toolchain)
+    return get_elwise_module_descriptor(arguments, operation, name).compile(toolchain)
 
 
 def get_elwise_kernel(arguments, operation, name="kernel", toolchain=None):

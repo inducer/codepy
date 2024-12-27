@@ -1,5 +1,7 @@
 """Convenience interface for using CodePy with Boost.Python."""
 
+from dataclasses import replace
+
 
 class BoostPythonModule:
     def __init__(self, name="module", max_arity=None,
@@ -166,7 +168,8 @@ class BoostPythonModule:
         """
 
         from codepy.libraries import add_boost_python
-        toolchain = toolchain.copy()
+
+        toolchain = replace(toolchain)
         add_boost_python(toolchain)
 
         from codepy.jit import extension_from_string
