@@ -1,23 +1,25 @@
+import math
+import sys
+
+import numpy as np
+import pycuda.autoinit
+import pycuda.driver
+import pycuda.gpuarray
+
 import cgen as c
 from cgen.cuda import CudaGlobal
 
 from codepy.bpl import BoostPythonModule
 from codepy.cuda import CudaModule
+from codepy.toolchain import guess_nvcc_toolchain, guess_toolchain
 
 
 # This file tests the ability to use compile and link CUDA code into the
 # Python interpreter.  Running this test requires PyCUDA
 # as well as CUDA 3.0beta (or greater)
 
-
 # The host module should include a function which is callable from Python
 host_mod = BoostPythonModule()
-
-import math
-
-# Are we on a 32 or 64 bit platform?
-import sys
-
 
 bitness = math.log(sys.maxsize) + 1
 ptr_sz_uint_conv = "K" if bitness > 32 else "I"
@@ -49,14 +51,13 @@ statements = [
     "PyObject* remoteResult = PyObject_Call(GPUArrayClass, args, kwargs)",
     "return remoteResult"]
 
-
 host_mod.add_function(
     c.FunctionBody(
-        c.FunctionDeclaration(c.Pointer(c.Value("PyObject", "adjacentDifference")),
-                            [c.Pointer(c.Value("PyObject", "gpuArray"))]),
+        c.FunctionDeclaration(
+            c.Pointer(c.Value("PyObject", "adjacentDifference")),
+            [c.Pointer(c.Value("PyObject", "gpuArray"))]),
         c.Block([c.Statement(x) for x in statements])))
 host_mod.add_to_preamble([c.Include("boost/python/extract.hpp")])
-
 
 cuda_mod = CudaModule(host_mod)
 cuda_mod.add_to_preamble([c.Include("cuda.h")])
@@ -72,54 +73,45 @@ launch = ["CUdeviceptr output",
 
 diff = [
     c.Template("typename T",
-             CudaGlobal(c.FunctionDeclaration(c.Value("void", "diffKernel"),
-                [c.Value("T*", "inputPtr"),
-                 c.Value("int", "length"),
-                 c.Value("T*", "outputPtr")]))),
-    c.Block([c.Statement(global_index),
-           c.If("index == 0",
-              c.Statement("outputPtr[0] = inputPtr[0]"),
-              c.If("index < length",
-                 c.Statement(compute_diff),
-                 c.Statement("")))]),
+               CudaGlobal(c.FunctionDeclaration(c.Value("void", "diffKernel"),
+                          [c.Value("T*", "inputPtr"),
+                          c.Value("int", "length"),
+                          c.Value("T*", "outputPtr")]))),
+    c.Block([
+        c.Statement(global_index),
+        c.If("index == 0",
+        c.Statement("outputPtr[0] = inputPtr[0]"),
+        c.If("index < length",
+        c.Statement(compute_diff),
+        c.Statement("")))]),
 
     c.Template("typename T",
-                c.FunctionDeclaration(c.Value("CUdeviceptr", "difference"),
-                                          [c.Value("CUdeviceptr", "inputPtr"),
-                                           c.Value("int", "length")])),
+               c.FunctionDeclaration(c.Value("CUdeviceptr", "difference"),
+                                     [c.Value("CUdeviceptr", "inputPtr"),
+                                     c.Value("int", "length")])),
     c.Block([c.Statement(x) for x in launch])]
-
 cuda_mod.add_to_module(diff)
+
+# CudaModule.add_function also adds a declaration of this function to the
+# BoostPythonModule which is responsible for the host function.
+
 diff_instance = c.FunctionBody(
     c.FunctionDeclaration(c.Value("CUdeviceptr", "diffInstance"),
-                        [c.Value("CUdeviceptr", "inputPtr"),
-                         c.Value("int", "length")]),
+                          [c.Value("CUdeviceptr", "inputPtr"),
+                          c.Value("int", "length")]),
     c.Block([c.Statement("return difference<int>(inputPtr, length)")]))
-
-# CudaModule.add_function also adds a declaration of this
-# function to the BoostPythonModule which
-# is responsible for the host function.
 cuda_mod.add_function(diff_instance)
 
-import codepy.jit
-import codepy.toolchain
-
-
-gcc_toolchain = codepy.toolchain.guess_toolchain()
-nvcc_toolchain = codepy.toolchain.guess_nvcc_toolchain()
-
+gcc_toolchain = guess_toolchain()
+nvcc_toolchain = guess_nvcc_toolchain()
 module = cuda_mod.compile(gcc_toolchain, nvcc_toolchain, debug=True)
-import numpy as np
-import pycuda.autoinit
-import pycuda.driver
-import pycuda.gpuarray
 
-
-length = 25
-constant_value = 2
 # This is a strange way to create a GPUArray, but is meant to illustrate
 # how to construct a GPUArray if the GPU buffer it owns has been
 # created by something else
+
+length = 25
+constant_value = 2
 
 pointer = pycuda.driver.mem_alloc(length * 4)
 pycuda.driver.memset_d32(pointer, constant_value, length)
@@ -129,6 +121,7 @@ b = module.adjacentDifference(a).get()
 golden = [constant_value] + [0] * (length - 1)
 difference = [(x-y)*(x-y) for x, y in zip(b, golden, strict=True)]
 error = sum(difference)
+
 if error == 0:
     print("Test passed!")
 else:
