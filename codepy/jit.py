@@ -217,11 +217,6 @@ def extension_from_string(
 
     If *debug* is ``True``, commands involved in the build are printed.
 
-    If *wait_on_error* is ``True``, the full path name of the temporary in
-    which a :exc:`CompileError` occurred is shown and the user is expected
-    to press a key before the temporary file gets deleted. If *wait_on_error*
-    is ``None``, it is taken to be the same as *debug*.
-
     If *debug_recompile*, messages are printed indicating whether a
     recompilation is taking place.
     """
@@ -289,11 +284,6 @@ def compile_from_string(
 
     If *debug* is ``True``, commands involved in the build are printed.
 
-    If *wait_on_error* is ``True``, the full path name of the temporary in
-    which a :exc:`CompileError` occurred is shown and the user is expected
-    to press a key before the temporary file gets deleted. If *wait_on_error*
-    is ``None``, it is taken to be the same as *debug*.
-
     If *debug_recompile*, messages are printed indicating whether a
     recompilation is taking place.
 
@@ -318,7 +308,7 @@ def compile_from_string(
 
     if wait_on_error is not None:
         from warnings import warn
-        warn("wait_on_error is deprecated and has no effect",
+        warn("Passing 'wait_on_error' is deprecated and has no effect. ",
              DeprecationWarning, stacklevel=2)
 
     import os
