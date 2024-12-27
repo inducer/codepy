@@ -123,18 +123,18 @@ def get_boost_libname(basename: str, aksetup: Config) -> list[str]:
 
 
 def add_boost_python(toolchain: Toolchain) -> None:
-    aksetup = get_aksetup_config()
     import sys
+
+    aksetup = get_aksetup_config()
+    version = sys.version_info[:2]
+
     toolchain.add_library(
             "boost-python",
             getlist(aksetup, "BOOST_INC_DIR", []),
             getlist(aksetup, "BOOST_LIB_DIR", []),
             [
-                *get_boost_libname("python-py{}{}".format(*sys.version_info[:2]),
-                                   aksetup),
-                "python{}.{}{}".format(
-                    *sys.version_info[:2],
-                    "m" if sys.version_info[0] >= 3 else "")
+                *get_boost_libname("python{}{}".format(*version), aksetup),
+                "python{}.{}{}".format(*version, sys.abiflags),
             ])
 
 
