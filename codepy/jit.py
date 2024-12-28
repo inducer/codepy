@@ -32,7 +32,6 @@ from dataclasses import dataclass
 from types import ModuleType
 from typing import Any, NamedTuple
 
-from codepy import CompileError
 from codepy.toolchain import GCCLikeToolchain, Toolchain
 
 
@@ -195,7 +194,6 @@ def extension_from_string(
         source_name: str | list[str] = "module.cpp",
         cache_dir: str | None = None,
         debug: bool = False,
-        wait_on_error: bool | None = None,
         debug_recompile: bool = True,
         sleep_delay: int = 1) -> ModuleType:
     """Return a reference to the extension module *name*, which can be built
@@ -221,8 +219,9 @@ def extension_from_string(
     recompilation is taking place.
     """
     _checksum, mod_name, ext_file, _recompiled = (
-        compile_from_string(toolchain, name, source_string, source_name,
-                            cache_dir, debug, wait_on_error, debug_recompile,
+        compile_from_string(toolchain, name, source_string, source_name=source_name,
+                            cache_dir=cache_dir, debug=debug,
+                            debug_recompile=debug_recompile,
                             object=False, sleep_delay=sleep_delay))
 
     # try loading it
@@ -250,10 +249,10 @@ def compile_from_string(
         toolchain: Toolchain,
         name: str,
         source_string: str | bytes | list[str] | list[bytes],
+        *,
         source_name: str | list[str] | None = None,
         cache_dir: str | None = None,
         debug: bool = False,
-        wait_on_error: bool | None = None,
         debug_recompile: bool = True,
         object: bool = False,
         source_is_binary: bool = False,
@@ -305,11 +304,6 @@ def compile_from_string(
 
     if isinstance(source_name, str):
         source_name = [source_name]
-
-    if wait_on_error is not None:
-        from warnings import warn
-        warn("Passing 'wait_on_error' is deprecated and has no effect. ",
-             DeprecationWarning, stacklevel=2)
 
     import os
 
@@ -487,7 +481,7 @@ def link_extension(
         mod_name: str,
         cache_dir: str | None = None,
         debug: bool = False,
-        wait_on_error: bool = True) -> ModuleType:
+        ) -> ModuleType:
     if not isinstance(toolchain, GCCLikeToolchain):
         raise TypeError(f"Unsupported toolchain type: {type(toolchain)}")
 
@@ -501,12 +495,7 @@ def link_extension(
                 destination_base,
                 mod_name + toolchain.so_ext)
 
-    try:
-        toolchain.link_extension(destination, objects, debug=debug)
-    except CompileError:
-        if wait_on_error:
-            input(f"Link error, examine {objects}, then press [Enter]")
-            raise
+    toolchain.link_extension(destination, objects, debug=debug)
 
     # try loading it
     from codepy.tools import load_dynamic
