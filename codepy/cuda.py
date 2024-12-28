@@ -101,7 +101,7 @@ class CudaModule:
                         object=True, **local_host_kwargs)
         device_checksum, _device_mod_name, device_object, device_compiled = \
                 compile_from_string(
-                        nvcc_toolchain, "gpu", device_code, "gpu.cu",
+                        nvcc_toolchain, "gpu", device_code, source_name="gpu.cu",
                         object=True, **local_nvcc_kwargs)
         # The name of the shared lib depends on the hex checksums of both
         # host and device code to prevent accidentally returned a cached
