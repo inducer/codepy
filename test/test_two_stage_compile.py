@@ -4,7 +4,7 @@ from codepy.jit import compile_from_string
 from codepy.toolchain import guess_toolchain
 
 
-def test():
+def test() -> None:
     toolchain = guess_toolchain()
 
     module_code = """
