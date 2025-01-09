@@ -29,6 +29,8 @@ from collections.abc import Iterable
 from dataclasses import dataclass, replace
 from typing import Any
 
+from typing_extensions import Self
+
 from codepy import CompileError
 
 
@@ -45,7 +47,7 @@ class Toolchain(ABC):
 
     features: set[str]
 
-    def copy(self, **kwargs: Any) -> "Toolchain":
+    def copy(self, **kwargs: Any) -> Self:
         from warnings import warn
         warn(f"'{type(self).__name__}.copy' is deprecated. This is now a "
              "dataclass and should be used with the standard 'replace'.",
