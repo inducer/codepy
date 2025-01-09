@@ -1,13 +1,20 @@
+"""Convenience interface for using CodePy with CUDA"""
+
+from collections.abc import Iterable
 from dataclasses import replace
+from types import ModuleType
+from typing import Any
 
 import cgen
 
-
-"""Convenience interface for using CodePy with CUDA"""
+from codepy.bpl import BoostPythonModule
+from codepy.toolchain import NVCCToolchain, Toolchain
 
 
 class CudaModule:
-    def __init__(self, boost_module, name="module"):
+    def __init__(self,
+                 boost_module: BoostPythonModule,
+                 name: str = "module") -> None:
         """*boost_module* is a codepy.BoostPythonModule containing host code
         which calls CUDA code.
         Current limitations of nvcc preclude compiling anything which
@@ -19,21 +26,21 @@ class CudaModule:
         """
         self.name = name
 
-        self.preamble = []
-        self.body = []
+        self.preamble: list[cgen.Generable] = []
+        self.body: list[cgen.Generable] = []
         self.boost_module = boost_module
         self.boost_module.add_to_preamble([cgen.Include("cuda.h")])
 
-    def add_to_preamble(self, pa):
+    def add_to_preamble(self, pa: Iterable[cgen.Generable]) -> None:
         self.preamble.extend(pa)
 
-    def add_to_module(self, body):
+    def add_to_module(self, body: Iterable[cgen.Generable]) -> None:
         """Add the :class:`cgen.Generable` instances in the iterable
         *body* to the body of the module *self*.
         """
         self.body.extend(body)
 
-    def add_function(self, func):
+    def add_function(self, func: cgen.FunctionBody) -> None:
         """Add a function to be exposed to code in the BoostPythonModule.
         *func* is expected to be a :class:`cgen.FunctionBody`.
         Additionally, *func* must be a host callable function,
@@ -42,7 +49,7 @@ class CudaModule:
         self.boost_module.add_to_preamble([func.fdecl])
         self.body.append(func)
 
-    def generate(self):
+    def generate(self) -> cgen.Module:
         """Generate (i.e. yield) the source code of the
         module line-by-line.
         """
@@ -50,8 +57,12 @@ class CudaModule:
         body += [*self.preamble, cgen.Line(), *self.body]
         return cgen.Module(body)
 
-    def compile(self, host_toolchain, nvcc_toolchain,
-            host_kwargs=None, nvcc_kwargs=None, **kwargs):
+    def compile(self,
+                host_toolchain: Toolchain,
+                nvcc_toolchain: NVCCToolchain,
+                host_kwargs: dict[str, Any] | None = None,
+                nvcc_kwargs: dict[str, Any] | None = None,
+                **kwargs: Any) -> ModuleType:
         """Return the extension module generated from the code described
         by *self*. If necessary, build the code using *toolchain* with
         :func:`codepy.jit.extension_from_string`. Any keyword arguments
@@ -104,11 +115,13 @@ class CudaModule:
         else:
             import os.path
 
+            ext = getattr(host_toolchain, "so_ext", ".so")
             destination_base, _ = os.path.split(host_object)
-            module_path = os.path.join(destination_base, mod_name
-                                       + host_toolchain.so_ext)
+            module_path = os.path.join(destination_base, f"{mod_name}{ext}")
+
+            from codepy.tools import load_dynamic
+
             try:
-                from codepy.tools import load_dynamic
                 return load_dynamic(mod_name, module_path)
             except Exception:
                 return link_extension(host_toolchain,
