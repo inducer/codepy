@@ -1,4 +1,10 @@
-"""Just-in-time Python extension compilation."""
+"""
+:mod:`codepy.jit` -- Compilation and Linking of C Source Code
+-------------------------------------------------------------
+
+.. autofunction:: extension_file_from_string
+.. autofunction:: extension_from_string
+"""
 
 
 __copyright__ = """
@@ -56,7 +62,7 @@ def extension_file_from_string(
         debug: bool = False) -> None:
     """Using *toolchain*, build the extension file named *ext_file*
     from the source code in *source_string*, which is saved to a
-    temporary file named *source_name*. Raise :exc:`CompileError` in
+    temporary file named *source_name*. Raise :exc:`~codepy.CompileError` in
     case of error.
 
     If *debug* is True, show commands involved in the build.
@@ -198,7 +204,7 @@ def extension_from_string(
         sleep_delay: int = 1) -> ModuleType:
     """Return a reference to the extension module *name*, which can be built
     from the source code in *source_string* if necessary. Raise
-    :exc:`CompileError` in case of error.
+    :exc:`codepy.CompileError` in case of error.
 
     Compiled code is cached in *cache_dir* and available immediately if it has
     been compiled at some point in the past. Compiler and Python API versions
@@ -264,7 +270,7 @@ def compile_from_string(
     *recompiled* is *True* if the object had to be recompiled, *False* if the cache
     is hit.
 
-    Raises :exc:`CompileError` in case of error.  The *mod_name* and *file_name*
+    Raises :exc:`~codepy.CompileError` in case of error.  The *mod_name* and *file_name*
     are designed to be used with ``load_dynamic`` to load a Python module from
     this object, if desired.
 
