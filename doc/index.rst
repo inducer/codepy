@@ -5,8 +5,6 @@
 Welcome to CodePy's documentation!
 ==================================
 
-.. module:: codepy
-
 CodePy is a C metaprogramming toolkit for Python. It handles two aspects of
 metaprogramming:
 

@@ -1,4 +1,22 @@
-"""Toolchains for Just-in-time Python extension compilation."""
+"""
+:mod:`codepy.toolchain` -- Tool support code
+--------------------------------------------
+
+.. autoexception:: ToolchainGuessError
+
+.. autoclass:: Toolchain
+    :members: copy, get_version, abi_id, add_library, build_extension
+    :undoc-members:
+
+.. autoclass:: GCCLikeToolchain
+    :show-inheritance:
+
+.. autoclass:: GCCToolchain
+    :show-inheritance:
+
+.. autofunction:: guess_toolchain
+
+"""
 
 __copyright__ = """
 "Copyright (C) 2008,9 Andreas Kloeckner, Bryan Catanzaro
@@ -108,7 +126,7 @@ class Toolchain(ABC):
                         source_files: list[str],
                         debug: bool = False) -> None:
         """Create the extension file *ext_file* from *source_files*
-        by invoking the toolchain. Raise :exc:`~codepy.jit.CompileError` in
+        by invoking the toolchain. Raise :exc:`~codepy.CompileError` in
         case of error.
 
         If *debug* is True, print the commands executed.

@@ -1,4 +1,11 @@
-"""Convenience interface for using CodePy with Boost.Python."""
+"""
+:mod:`codepy.bpl` -- Support for Boost.Python
+---------------------------------------------
+
+.. autoclass:: BoostPythonModule
+    :members:
+    :undoc-members:
+"""
 
 from collections.abc import Callable, Iterable
 from dataclasses import replace
