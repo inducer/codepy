@@ -117,7 +117,12 @@ def get_aksetup_config() -> Config:
 
 def get_boost_libname(basename: str, aksetup: Config) -> list[str]:
     varname = f"BOOST_{basename.upper()}_LIBNAME"
-    libs = getlist(aksetup, varname, [f"boost_{basename}"])
+    default = f"boost_{basename}"
+    if basename == "python":
+        import sys
+        version = sys.version_info[:2]
+        default = "boost_python{}{}".format(*version)
+    libs = getlist(aksetup, varname, [default])
 
     return libs
 
@@ -133,7 +138,7 @@ def add_boost_python(toolchain: Toolchain) -> None:
             getlist(aksetup, "BOOST_INC_DIR", []),
             getlist(aksetup, "BOOST_LIB_DIR", []),
             [
-                *get_boost_libname("python{}{}".format(*version), aksetup),
+                *get_boost_libname("python", aksetup),
                 "python{}.{}{}".format(*version, sys.abiflags),
             ])
 
