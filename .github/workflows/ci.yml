@@ -33,12 +33,28 @@ jobs:
             uses: actions/setup-python@v5
             with:
                 python-version: ${{ matrix.python-version }}
+        -   uses: MarkusJx/install-boost@v2
+            with:
+                boost_version: 1.87.0
+                boost_install_dir: /home/runner/boost
+            id: install-boost
         -   name: "Main Script"
+            env:
+                BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
             run: |
                 curl -L -O https://tiker.net/ci-support-v0
                 . ./ci-support-v0
 
+                PY_VER=$(python3 -c 'import sys; print(f"{sys.version_info[0]}{sys.version_info[1]}")')
+                cat > $HOME/.aksetup-defaults.py <<EOF
+                BOOST_INC_DIR = ["$BOOST_ROOT/include"]
+                BOOST_LIB_DIR = ["$BOOST_ROOT/lib"]
+                BOOST_PYTHON_LIBNAME = ["boost_python$PY_VER-mt-x64"]
+                EOF
+
                 build_py_project_in_venv
+
+                export LD_LIBRARY_PATH="$BOOST_ROOT/lib:$LD_LIBRARY_PATH"
                 test_py_project
 
     mypy:
