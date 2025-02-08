@@ -72,7 +72,7 @@ jobs:
                 python-version: '3.x'
         -   name: "Main Script"
             run: |
-                EXTRA_INSTALL="mypy pytest"
+                EXTRA_INSTALL="mypy pytest pybind11"
                 curl -L -O https://tiker.net/ci-support-v0
                 . ./ci-support-v0
 
