@@ -143,6 +143,16 @@ def add_boost_python(toolchain: Toolchain) -> None:
             ])
 
 
+def add_pybind11(toolchain: Toolchain) -> None:
+    import pybind11
+
+    toolchain.add_library(
+            "pybind11",
+            [pybind11.get_include(False)],
+            [],
+            [])
+
+
 def add_boost_numeric_bindings(toolchain: Toolchain) -> None:
     aksetup = get_aksetup_config()
     toolchain.add_library(
