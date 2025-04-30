@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "codepy"
-version = "2024.1"
+version = "2025.1"
 description = "Generate and execute native code at run time"
 readme = "README.rst"
 license = { text = "MIT" }
