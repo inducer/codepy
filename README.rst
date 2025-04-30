@@ -1,9 +1,9 @@
 .. image:: https://gitlab.tiker.net/inducer/codepy/badges/main/pipeline.svg
     :alt: Gitlab Build Status
     :target: https://gitlab.tiker.net/inducer/codepy/commits/main
-.. image:: https://github.com/inducer/codepy/workflows/CI/badge.svg
+.. image:: https://github.com/inducer/codepy/actions/workflows/ci.yml/badge.svg
     :alt: Github Build Status
-    :target: https://github.com/inducer/codepy/actions?query=branch%3Amain+workflow%3ACI
+    :target: https://github.com/inducer/codepy/actions/workflows/ci.yml
 .. image:: https://badge.fury.io/py/codepy.svg
     :alt: Python Package Index Release Page
     :target: https://pypi.org/project/codepy/
