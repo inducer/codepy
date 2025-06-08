@@ -61,23 +61,22 @@ jobs:
                 export LD_LIBRARY_PATH="$BOOST_ROOT/lib:$LD_LIBRARY_PATH"
                 test_py_project
 
-    mypy:
-        name: Mypy
+    basedpyright:
         runs-on: ubuntu-latest
+
         steps:
         -   uses: actions/checkout@v4
-        -
-            uses: actions/setup-python@v5
+        -   uses: actions/setup-python@v5
             with:
                 python-version: '3.x'
         -   name: "Main Script"
             run: |
-                EXTRA_INSTALL="mypy pytest pybind11"
+                EXTRA_INSTALL="basedpyright pytest pybind11"
                 curl -L -O https://tiker.net/ci-support-v0
                 . ./ci-support-v0
 
                 build_py_project_in_venv
-                python -m mypy codepy test examples
+                basedpyright
 
     docs:
         name: Documentation
