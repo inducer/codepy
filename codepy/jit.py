@@ -33,10 +33,13 @@ THE SOFTWARE.
 """
 
 import logging
+import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from types import ModuleType
 from typing import Any, NamedTuple
+
+from typing_extensions import override
 
 from codepy.toolchain import GCCLikeToolchain, Toolchain
 
@@ -45,13 +48,10 @@ logger = logging.getLogger(__name__)
 
 
 def _erase_dir(dir: str) -> None:
-    from os import listdir, rmdir, unlink
-    from os.path import join
+    for name in os.listdir(dir):
+        os.unlink(os.path.join(dir, name))
 
-    for name in listdir(dir):
-        unlink(join(dir, name))
-
-    rmdir(dir)
+    os.rmdir(dir)
 
 
 def extension_file_from_string(
@@ -70,11 +70,9 @@ def extension_file_from_string(
     from tempfile import mkdtemp
     src_dir = mkdtemp()
 
-    from os.path import join
-
-    source_file = join(src_dir, source_name)
+    source_file = os.path.join(src_dir, source_name)
     with open(source_file, "w") as outf:
-        outf.write(str(source_string))
+        _ = outf.write(str(source_string))
 
     try:
         toolchain.build_extension(ext_file, [source_file], debug=debug)
@@ -99,10 +97,12 @@ class CleanupManager(CleanupBase):
     def register(self, c: CleanupBase) -> None:
         self.cleanups.insert(0, c)
 
+    @override
     def clean_up(self) -> None:
         for c in self.cleanups:
             c.clean_up()
 
+    @override
     def error_clean_up(self) -> None:
         for c in self.cleanups:
             c.error_clean_up()
@@ -111,16 +111,18 @@ class CleanupManager(CleanupBase):
 class TempDirManager(CleanupBase):
     def __init__(self, cleanup_m: CleanupManager) -> None:
         from tempfile import mkdtemp
-        self.path = mkdtemp()
+
+        self.path: str = mkdtemp()
         cleanup_m.register(self)
 
     def sub(self, n: str) -> str:
-        from os.path import join
-        return join(self.path, n)
+        return os.path.join(self.path, n)
 
+    @override
     def clean_up(self) -> None:
         _erase_dir(self.path)
 
+    @override
     def error_clean_up(self) -> None:
         pass
 
@@ -128,17 +130,16 @@ class TempDirManager(CleanupBase):
 class CacheLockManager(CleanupBase):
     def __init__(self,
                  cleanup_m: CleanupManager,
-                 cache_dir: str,
+                 cache_dir: str | None = None,
                  sleep_delay: int = 1) -> None:
-        import os
-
         if cache_dir is not None:
-            self.lock_file = os.path.join(cache_dir, "lock")
+            self.lock_file: str = os.path.join(cache_dir, "lock")
 
             attempts = 0
             while True:
                 try:
-                    self.fd = os.open(self.lock_file,
+                    self.fd: int = os.open(
+                            self.lock_file,
                             os.O_CREAT | os.O_WRONLY | os.O_EXCL)
                     break
                 except OSError:
@@ -156,39 +157,40 @@ class CacheLockManager(CleanupBase):
 
             cleanup_m.register(self)
 
+    @override
     def clean_up(self) -> None:
-        import os
         os.close(self.fd)
         os.unlink(self.lock_file)
 
+    @override
     def error_clean_up(self) -> None:
         pass
 
 
 class ModuleCacheDirManager(CleanupBase):
     def __init__(self, cleanup_m: CleanupManager, path: str) -> None:
-        from os import mkdir
-
-        self.path = path
         try:
-            mkdir(self.path)
+            os.mkdir(path)
             cleanup_m.register(self)
-            self.existed = False
+            existed = False
         except OSError:
-            self.existed = True
+            existed = True
+
+        self.path: str = path
+        self.existed: bool = existed
 
     def sub(self, n: str) -> str:
-        from os.path import join
-        return join(self.path, n)
+        return os.path.join(self.path, n)
 
     def reset(self) -> None:
-        import os
         _erase_dir(self.path)
         os.mkdir(self.path)
 
+    @override
     def clean_up(self) -> None:
         pass
 
+    @override
     def error_clean_up(self) -> None:
         _erase_dir(self.path)
 
@@ -311,8 +313,6 @@ def compile_from_string(
     if isinstance(source_name, str):
         source_name = [source_name]
 
-    import os
-
     if cache_dir is None:
         import sys
 
@@ -347,7 +347,7 @@ def compile_from_string(
     def write_source(name: list[str]) -> None:
         for i, source in enumerate(source_string):
             with open(name[i], "w" if not source_is_binary else "wb") as outf:
-                outf.write(source)
+                _ = outf.write(source)
 
     def calculate_hex_checksum() -> str:
         import hashlib
@@ -424,7 +424,7 @@ def compile_from_string(
     try:
         # Variable 'lock_m' is used for no other purpose than
         # to keep lock manager alive.
-        lock_m = CacheLockManager(cleanup_m, cache_dir, sleep_delay)  # noqa
+        lock_m = CacheLockManager(cleanup_m, cache_dir, sleep_delay)  # noqa: F841  # pyright: ignore[reportUnusedVariable]
 
         hex_checksum = calculate_hex_checksum()
         mod_name = f"codepy.temp.{hex_checksum}.{name}"
@@ -465,7 +465,7 @@ def compile_from_string(
         else:
             toolchain.build_extension(ext_file, source_paths, debug=debug)
 
-        if info_path is not None:
+        if info_path:
             import pickle
 
             with open(info_path, "wb") as info_file:
@@ -491,7 +491,6 @@ def link_extension(
     if not isinstance(toolchain, GCCLikeToolchain):
         raise TypeError(f"Unsupported toolchain type: {type(toolchain)}")
 
-    import os.path
     if cache_dir is not None:
         destination = os.path.join(cache_dir, mod_name + toolchain.so_ext)
     else:

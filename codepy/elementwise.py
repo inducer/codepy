@@ -8,6 +8,7 @@ from types import ModuleType
 from typing import Any
 
 import numpy as np
+from typing_extensions import override
 
 from cgen import POD, Declarator, Value, dtype_to_ctype
 from pytools import memoize
@@ -18,8 +19,8 @@ from codepy.toolchain import Toolchain
 
 class Argument(ABC):
     def __init__(self, dtype: Any, name: str) -> None:
-        self.dtype = np.dtype(dtype)
-        self.name = name
+        self.dtype: np.dtype[Any] = np.dtype(dtype)
+        self.name: str = name
 
     @abstractmethod
     def declarator(self) -> Declarator:
@@ -34,6 +35,7 @@ class Argument(ABC):
     def struct_char(self) -> str:
         pass
 
+    @override
     def __repr__(self) -> str:
         return "{}({!r}, {})".format(
                 self.__class__.__name__,
@@ -42,27 +44,33 @@ class Argument(ABC):
 
 
 class VectorArg(Argument):
+    @override
     def declarator(self) -> Value:
         return Value(
                 "numpy_array<{} >".format(dtype_to_ctype(self.dtype)),
                 f"{self.name}_ary")
 
+    @override
     def arg_name(self) -> str:
         return f"{self.name}_ary"
 
     @property
+    @override
     def struct_char(self) -> str:
         return "P"
 
 
 class ScalarArg(Argument):
+    @override
     def declarator(self) -> POD:
         return POD(self.dtype, self.name)
 
+    @override
     def arg_name(self) -> str:
         return self.name
 
     @property
+    @override
     def struct_char(self) -> str:
         return str(self.dtype.char)
 
@@ -164,11 +172,12 @@ class ElementwiseKernel:
                  operation: str,
                  name: str = "kernel",
                  toolchain: Toolchain | None = None) -> None:
-        self.arguments = arguments
-        self.module = get_elwise_module_binary(arguments, operation, name, toolchain)
-        self.func = getattr(self.module, name)
+        self.arguments: tuple[Argument, ...] = tuple(arguments)
+        self.module: ModuleType = (
+            get_elwise_module_binary(arguments, operation, name, toolchain))
+        self.func: Callable[..., Any] = getattr(self.module, name)
 
-        self.vec_arg_indices = [
+        self.vec_arg_indices: list[int] = [
             i for i, arg in enumerate(arguments)
             if isinstance(arg, VectorArg)]
 

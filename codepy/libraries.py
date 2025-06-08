@@ -3,7 +3,7 @@
 __copyright__ = "Copyright (C) 2008 Andreas Kloeckner"
 
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, TypeGuard
 
 from pytools import memoize
 
@@ -33,6 +33,10 @@ def search_on_path(filenames: Sequence[str]) -> str | None:
 Config = dict[str, Any]
 
 
+def is_str_list(val: list[object]) -> TypeGuard[list[str]]:
+    return all(isinstance(x, str) for x in val)
+
+
 def getstring(options: Config, key: str, default: str | None = None) -> str | None:
     value = options.get(key)
     if value is None:
@@ -43,12 +47,15 @@ def getstring(options: Config, key: str, default: str | None = None) -> str | No
 
 
 def getlist(options: Config, key: str, default: list[str]) -> list[str]:
-    value = options.get(key)
+    value: list[object] | None = options.get(key)
     if value is None:
         return default
 
     assert isinstance(value, list)
-    return value
+    if is_str_list(value):
+        return value
+
+    raise ValueError(f"List has non-string elements: {value}")
 
 
 def expand_str(s: str, options: Config) -> str:
@@ -72,7 +79,7 @@ def expand_value(v: Any, options: Config) -> Any:
     if isinstance(v, str):
         return expand_str(v, options)
     elif isinstance(v, list):
-        return [expand_value(i, options) for i in v]
+        return [expand_value(i, options) for i in v]  # pyright: ignore[reportUnknownVariableType]
     else:
         return v
 

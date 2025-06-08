@@ -22,15 +22,15 @@ class BoostPythonModule:
                  name: str = "module",
                  max_arity: int | str | None = None,
                  use_private_namespace: bool = True) -> None:
-        self.name = name
-        self.max_arity = max_arity
-        self.use_private_namespace = use_private_namespace
+        self.name: str = name
+        self.max_arity: int | str | None = max_arity
+        self.use_private_namespace: bool = use_private_namespace
 
         self.preamble: list[Generable] = []
         self.mod_body: list[Generable] = []
         self.init_body: list[Generable] = []
-        self.has_codepy_include = False
-        self.has_raw_function_include = False
+        self.has_codepy_include: bool = False
+        self.has_raw_function_include: bool = False
 
     def add_to_init(self, body: Iterable[Generable]) -> None:
         """Add the blocks or statements contained in the iterable *body* to the
@@ -125,32 +125,37 @@ class BoostPythonModule:
 
         from cgen import Block, Line, Statement, Typedef, Value
 
+        tpname = struct.tpname
+        if tpname is None:
+            raise TypeError("Struct with no name is not supported")
+
         if py_name is None:
-            py_name = struct.tpname
+            py_name = tpname
 
         self.mod_body.append(struct)
 
-        member_defs = []
+        member_defs: list[str] = []
         for f in struct.fields:
-            if not hasattr(f, "name"):
+            name = getattr(f, "name", None)
+            if name is None:
                 raise TypeError(
                     f"Invalid type {type(f)} of struct field. Only named fields "
                     "are supported for code generation")
 
-            py_f_name = py_member_name_transform(f.name)
+            py_f_name = py_member_name_transform(name)
             tp_lines, _ = f.get_decl_pair()
-            if f.name in by_value_members or tp_lines[0].startswith("numpy_"):
+            if name in by_value_members or tp_lines[0].startswith("numpy_"):
                 member_defs.append(
                         ".def(pyublas::by_value_rw_member"
-                        f'("{py_f_name}", &cl::{f.name}))')
+                        f'("{py_f_name}", &cl::{name}))')
             else:
                 member_defs.append(
-                        f'.def_readwrite("{py_f_name}", &cl::{f.name})'
+                        f'.def_readwrite("{py_f_name}", &cl::{name})'
                         )
 
         self.init_body.append(
             Block([
-                Typedef(Value(struct.tpname, "cl")),
+                Typedef(Value(tpname, "cl")),
                 Line(),
                 Statement(
                     'boost::python::class_<cl>("{}"){}'.format(
