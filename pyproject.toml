@@ -83,13 +83,14 @@ known-first-party = [ "cgen", "pytools" ]
 known-local-folder = [ "codepy" ]
 lines-after-imports = 2
 
-[tool.mypy]
-python_version = "3.10"
-strict = true
-warn_unused_ignores = true
+[tool.basedpyright]
+pythonVersion = "3.10"
+pythonPlatform = "All"
 
-[[tool.mypy.overrides]]
-module = [
-    "pycuda.*",
+reportImplicitStringConcatenation = "none"
+reportExplicitAny = "none"
+reportAny = "none"
+
+ignore = [
+    "examples/nvcc-test.py",
 ]
-ignore_missing_imports = true
