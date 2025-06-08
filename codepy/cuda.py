@@ -24,11 +24,11 @@ class CudaModule:
         CUDA code to be compiled by nvcc, as well as bridges between the CUDA
         code and the BoostPythonModule.
         """
-        self.name = name
+        self.name: str = name
 
         self.preamble: list[cgen.Generable] = []
         self.body: list[cgen.Generable] = []
-        self.boost_module = boost_module
+        self.boost_module: BoostPythonModule = boost_module
         self.boost_module.add_to_preamble([cgen.Include("cuda.h")])
 
     def add_to_preamble(self, pa: Iterable[cgen.Generable]) -> None:
@@ -53,7 +53,7 @@ class CudaModule:
         """Generate (i.e. yield) the source code of the
         module line-by-line.
         """
-        body = []
+        body: list[cgen.Generable] = []
         body += [*self.preamble, cgen.Line(), *self.body]
         return cgen.Module(body)
 
