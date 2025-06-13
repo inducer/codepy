@@ -7,7 +7,7 @@ name = "codepy"
 version = "2025.1"
 description = "Generate and execute native code at run time"
 readme = "README.rst"
-license = { text = "MIT" }
+license = "MIT"
 authors = [
     { name = "Andreas Kloeckner", email = "inform@tiker.net" },
 ]
@@ -17,7 +17,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Other Audience",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python",
     "Topic :: Scientific/Engineering",
