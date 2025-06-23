@@ -92,4 +92,5 @@ reportAny = "none"
 
 ignore = [
     "examples/nvcc-test.py",
+    "codepy/elementwise.py",
 ]

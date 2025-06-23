@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
 from types import ModuleType
 from typing import Any
+from warnings import warn
 
 import numpy as np
 from typing_extensions import override
@@ -15,6 +16,10 @@ from pytools import memoize
 
 from codepy.bpl import BoostPythonModule
 from codepy.toolchain import Toolchain
+
+
+warn("codepy.elementwise is deprecated and will be removed in 2026.",
+     DeprecationWarning, stacklevel=2)
 
 
 class Argument(ABC):
