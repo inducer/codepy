@@ -2,7 +2,7 @@ import math
 import sys
 
 import numpy as np
-import pycuda.autoinit
+import pycuda.autoinit  # noqa: F401
 import pycuda.driver
 import pycuda.gpuarray
 
