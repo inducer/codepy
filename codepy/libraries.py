@@ -185,8 +185,8 @@ def add_numpy(toolchain: Toolchain) -> None:
 
 def add_py_module(toolchain: Toolchain, name: str) -> None:
     def get_module_include_path(name: str) -> str:
-        from pkg_resources import Requirement, resource_filename
-        return resource_filename(Requirement.parse(name), f"{name}/include")
+        from importlib.resources import files
+        return str(files(name) / "include")
 
     toolchain.add_library(name, [get_module_include_path(name)], [], [])
 
