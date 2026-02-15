@@ -185,8 +185,14 @@ def add_numpy(toolchain: Toolchain) -> None:
 
 def add_py_module(toolchain: Toolchain, name: str) -> None:
     def get_module_include_path(name: str) -> str:
-        from importlib.resources import files
-        return str(files(name) / "include")
+        from importlib.util import find_spec
+        spec = find_spec(name)
+        if spec is None:
+            raise RuntimeError(f"Could not find module '{name}'")
+        libdir = spec.submodule_search_locations
+        assert libdir is not None
+        from os.path import join
+        return join(libdir[0], "include")
 
     toolchain.add_library(name, [get_module_include_path(name)], [], [])
 
