@@ -367,33 +367,27 @@ def compile_from_string(
         import pickle
 
         try:
-            info_file = open(info_path, "rb")
-        except OSError as exc:
+            with open(info_path, "rb") as info_file:
+                return pickle.load(info_file)
+        except (OSError, EOFError) as exc:
             raise _InvalidInfoFileError() from exc
-
-        try:
-            return pickle.load(info_file)
-        except EOFError as exc:
-            raise _InvalidInfoFileError() from exc
-        finally:
-            info_file.close()
 
     def check_deps(deps: list[_Dependency]) -> bool:
-        for name, date, md5sum in deps:
+        for dep_name, date, md5sum in deps:
             try:
-                possibly_updated = os.stat(name).st_mtime != date
+                possibly_updated = os.stat(dep_name).st_mtime != date
             except OSError as e:
                 if debug_recompile:
                     logger.info(
                             "recompiling because dependency %s is "
-                            "inaccessible (%s).", name, e)
+                            "inaccessible (%s).", dep_name, e)
                 return False
             else:
-                if possibly_updated and md5sum != get_file_md5sum(name):
+                if possibly_updated and md5sum != get_file_md5sum(dep_name):
                     if debug_recompile:
                         logger.info(
                                 "recompiling because dependency %s was "
-                                "updated.", name)
+                                "updated.", dep_name)
                     return False
 
         return True
@@ -402,17 +396,16 @@ def compile_from_string(
         valid = True
         for i, path in enumerate(source_path):
             source = source_string[i]
+
             try:
-                src_f = open(path, "r" if not source_is_binary else "rb")
+                with open(path, "r" if not source_is_binary else "rb") as src_f:
+                    valid = valid and src_f.read() == source
             except OSError:
                 if debug_recompile:
                     logger.info(
                             "recompiling because cache directory does "
                             "not contain source file '%s'.", path)
                 return False
-
-            valid = valid and src_f.read() == source
-            src_f.close()
 
             if not valid:
                 from warnings import warn
@@ -473,7 +466,7 @@ def compile_from_string(
                     dependencies=get_dep_structure(source_paths),
                     source_name=source_name), info_file)
 
-        return hex_checksum, mod_name, ext_file, True
+        return hex_checksum, mod_name, ext_file, True  # noqa: TRY300
     except Exception:
         cleanup_m.error_clean_up()
         raise
