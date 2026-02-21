@@ -100,7 +100,7 @@ def get_aksetup_config() -> Config:
 
             with open(fname) as cf_file:
                 file_contents = cf_file.read()
-            exec(compile(file_contents, fname, "exec"), filevars)
+            exec(compile(file_contents, fname, "exec"), filevars)  # noqa: S102
 
             for key, value in filevars.items():
                 if key != "__builtins__":
@@ -129,9 +129,8 @@ def get_boost_libname(basename: str, aksetup: Config) -> list[str]:
         import sys
         version = sys.version_info[:2]
         default = "boost_python{}{}".format(*version)
-    libs = getlist(aksetup, varname, [default])
 
-    return libs
+    return getlist(aksetup, varname, [default])
 
 
 def add_boost_python(toolchain: Toolchain) -> None:
