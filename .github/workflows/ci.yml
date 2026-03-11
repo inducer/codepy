@@ -73,7 +73,7 @@ jobs:
                 python-version: '3.x'
         -   name: "Main Script"
             run: |
-                EXTRA_INSTALL="basedpyright pytest pybind11"
+                EXTRA_INSTALL="basedpyright pytest pybind11 setuptools"
                 curl -L -O https://tiker.net/ci-support-v0
                 . ./ci-support-v0
 
