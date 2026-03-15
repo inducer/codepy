@@ -466,7 +466,7 @@ def compile_from_string(
                     dependencies=get_dep_structure(source_paths),
                     source_name=source_name), info_file)
 
-        return hex_checksum, mod_name, ext_file, True  # noqa: TRY300
+        return hex_checksum, mod_name, ext_file, True
     except Exception:
         cleanup_m.error_clean_up()
         raise
