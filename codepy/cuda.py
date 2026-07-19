@@ -123,7 +123,7 @@ class CudaModule:
 
             try:
                 return load_dynamic(mod_name, module_path)
-            except Exception:  # noqa: BLE001
+            except Exception:  # ruff:ignore[blind-except]
                 return link_extension(host_toolchain,
                                       [host_object, device_object],
                                       mod_name, **kwargs)

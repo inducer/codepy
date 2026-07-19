@@ -63,18 +63,18 @@ extend-select = [
 ]
 extend-ignore = [
     "C90",   # McCabe complexity
-    "E226",  # missing whitespace around arithmetic operator
-    "E241",  # multiple spaces after comma
-    "E242",  # tab after comma
-    "E402",  # module level import not at the top of file
-    "UP031", # use f-strings instead of %
-    "UP032", # use f-strings instead of .format
-    "RUF067", # no code in __init__ *shrug*
+    "missing-whitespace-around-arithmetic-operator",
+    "multiple-spaces-after-comma",
+    "tab-after-comma",
+    "module-import-not-at-top-of-file",
+    "printf-string-formatting",
+    "f-string",
+    "non-empty-init-module",
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"test/test_*.py" = ["S102"]
-"doc/conf.py" = ["S102", "DTZ002"]
+"test/test_*.py" = ["exec-builtin"]
+"doc/conf.py" = ["exec-builtin", "call-datetime-today"]
 
 [tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"
