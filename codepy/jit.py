@@ -417,7 +417,7 @@ def compile_from_string(
     try:
         # Variable 'lock_m' is used for no other purpose than
         # to keep lock manager alive.
-        lock_m = CacheLockManager(cleanup_m, cache_dir, sleep_delay)  # noqa: F841  # pyright: ignore[reportUnusedVariable]
+        lock_m = CacheLockManager(cleanup_m, cache_dir, sleep_delay)  # ruff:ignore[unused-variable]  # pyright: ignore[reportUnusedVariable]
 
         hex_checksum = calculate_hex_checksum()
         mod_name = f"codepy.temp.{hex_checksum}.{name}"
