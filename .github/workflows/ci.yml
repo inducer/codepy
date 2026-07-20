@@ -19,7 +19,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
         -   uses: actions/checkout@v7
-        -   uses: actions/setup-python@v6
+        -   uses: actions/setup-python@v7
         -   name: "Main Script"
             run: |
                 pip install ruff
@@ -36,7 +36,7 @@ jobs:
         steps:
         -   uses: actions/checkout@v7
         -
-            uses: actions/setup-python@v6
+            uses: actions/setup-python@v7
             with:
                 python-version: ${{ matrix.python-version }}
         -   uses: MarkusJx/install-boost@v2
@@ -68,7 +68,7 @@ jobs:
 
         steps:
         -   uses: actions/checkout@v7
-        -   uses: actions/setup-python@v6
+        -   uses: actions/setup-python@v7
             with:
                 python-version: '3.x'
         -   name: "Main Script"
@@ -86,7 +86,7 @@ jobs:
         steps:
         -   uses: actions/checkout@v7
         -
-            uses: actions/setup-python@v6
+            uses: actions/setup-python@v7
             with:
                 python-version: '3.x'
         -   name: "Main Script"
