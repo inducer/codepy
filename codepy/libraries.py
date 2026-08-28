@@ -100,7 +100,7 @@ def get_aksetup_config() -> Config:
 
             with open(fname) as cf_file:
                 file_contents = cf_file.read()
-            exec(compile(file_contents, fname, "exec"), filevars)  # ruff:ignore[exec-builtin]
+            exec(compile(file_contents, fname, "exec"), filevars)
 
             for key, value in filevars.items():
                 if key != "__builtins__":
