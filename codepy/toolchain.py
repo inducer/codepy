@@ -114,6 +114,7 @@ class Toolchain(ABC):
             if ldir not in self.library_dirs:
                 self.library_dirs.append(ldir)
 
+        # ruff: ignore[unnecessary-dunder-call]
         object.__setattr__(self, "libraries", list(libraries) + self.libraries)
 
     @abstractmethod
@@ -210,6 +211,7 @@ class GCCLikeToolchain(Toolchain, ABC):
         return stdout
 
     def enable_debugging(self) -> None:
+        # ruff: ignore[unnecessary-dunder-call]
         object.__setattr__(
             self, "cflags",
             [f for f in self.cflags if not f.startswith("-O")] + ["-g"])
